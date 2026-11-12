@@ -1,6 +1,7 @@
 import { createHash, timingSafeEqual } from "node:crypto";
 import { z } from "zod";
 import { AUTH_COOKIE, getRole, sign } from "@/lib/auth";
+import { getFloors } from "@/lib/db";
 
 const Body = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("sales"), pin: z.string().max(100) }),
@@ -38,7 +39,8 @@ export async function POST(req: Request) {
 }
 
 export async function GET() {
-  return Response.json({ role: await getRole() });
+  const role = await getRole();
+  return Response.json(role ? { role, floors: await getFloors() } : { role: null });
 }
 
 export async function DELETE() {

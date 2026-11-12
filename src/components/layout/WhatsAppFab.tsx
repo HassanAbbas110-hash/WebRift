@@ -7,6 +7,7 @@ export function WhatsAppFab() {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Chat with WebRift on WhatsApp"
+      data-fab
       className="group fixed right-5 bottom-5 z-50 grid size-14 place-items-center rounded-full bg-[#25d366] text-white shadow-[0_8px_30px_-6px_rgba(37,211,102,0.7)] transition hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-cyan"
     >
       <span aria-hidden="true" className="absolute inset-0 rounded-full bg-[#25d366] opacity-40 motion-safe:animate-ping [animation-duration:2.5s]" />

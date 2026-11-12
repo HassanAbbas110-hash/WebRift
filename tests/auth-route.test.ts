@@ -42,9 +42,14 @@ describe("/api/auth", () => {
     delete process.env.AUTH_SECRET;
     expect((await post({ kind: "sales", pin: "1234" })).status).toBe(401);
   });
-  it("GET returns role", async () => {
+  it("GET returns role and floors for sales", async () => {
     role.value = "sales";
-    expect(await (await GET()).json()).toEqual({ role: "sales" });
+    vi.mocked(db.getFloors).mockResolvedValue({ "vape-starter": 3500 });
+    expect(await (await GET()).json()).toEqual({ role: "sales", floors: { "vape-starter": 3500 } });
+  });
+  it("GET hides floors from the public", async () => {
+    vi.mocked(db.getFloors).mockResolvedValue({ "vape-starter": 3500 });
+    expect(await (await GET()).json()).toEqual({ role: null });
   });
   it("DELETE clears cookie", async () => {
     expect((await DELETE()).headers.get("set-cookie")).toMatch(/wr_auth=;|Max-Age=0/i);

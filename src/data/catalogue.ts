@@ -31,7 +31,6 @@ export type Pack = {
   blurb: string;
   setup: number;
   monthly: number;
-  defaultFloor?: number;
   productIds: string[];
   bonuses: { label: string; worth: number }[];
   marketY1: number;
@@ -253,7 +252,7 @@ export const packs: Pack[] = [
     id: "vape-starter", name: "Vape Starter", audience: "VAPE SHOPS",
     tagline: "Get online and get found",
     blurb: "The essentials for a vape shop to look professional, take orders on WhatsApp and be found on Google.",
-    setup: 4000, monthly: 500, defaultFloor: 3500,
+    setup: 4000, monthly: 500,
     productIds: ["storefront", "age-check", "google-maps", "domain-email"],
     bonuses: [QR, SIGNS], marketY1: 25600, separatelyY1: 16110,
   },

@@ -114,3 +114,9 @@ export function quoteWhatsAppText(id: string, t: QuoteTotals, url: string): stri
   out.push("Estimate only, excl. VAT. Prices may change.", url);
   return out.join("\n");
 }
+
+/** validUntil is a Johannesburg calendar date (YYYY-MM-DD); the quote holds until that day ends there. */
+export function quoteStatus(validUntil: string, now: Date): "valid" | "expired" {
+  const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Africa/Johannesburg" }).format(now);
+  return today > validUntil ? "expired" : "valid";
+}

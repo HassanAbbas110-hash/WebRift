@@ -55,6 +55,13 @@ body {
   -webkit-backdrop-filter: blur(16px) saturate(160%);
 }
 
+/* Lift the WhatsApp button above the quote bottom sheet on small screens. */
+@media (width < 64rem) {
+  body:has([data-sheet]) [data-fab] {
+    bottom: 13rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

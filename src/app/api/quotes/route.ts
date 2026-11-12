@@ -21,12 +21,13 @@ const Body = z.object({
     shop: z.string().trim().max(80).optional(),
     consent: z.boolean(),
   }).refine((c) => c.consent === true).optional(),
+  marketer: z.string().trim().min(1).max(40).optional(),
 });
 
 export async function POST(req: Request) {
   const parsed = Body.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return Response.json({ error: "Invalid quote" }, { status: 400 });
-  const { client } = parsed.data;
+  const { client, marketer } = parsed.data;
   const input: QuoteInput = parsed.data.input;
 
   const role = await getRole(); // admin counts as sales
@@ -40,7 +41,7 @@ export async function POST(req: Request) {
   const negotiated = !!role && (totals.discountApplied > 0 || !!input.customLines?.length);
   const { id, validUntil } = await createQuote(input, totals, {
     client: client && { name: client.name, phone: client.phone, shop: client.shop },
-    marketer: negotiated ? role! : undefined, // shortcut: no per-person identity yet, so the role stands in for the marketer name
+    marketer: negotiated ? marketer ?? role! : undefined, // role stands in when no name was typed
     negotiated,
   });
   return Response.json({ id, url: `/q/${id}`, validUntil });

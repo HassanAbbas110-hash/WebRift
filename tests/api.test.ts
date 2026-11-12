@@ -44,6 +44,17 @@ describe("POST /api/quotes", () => {
     expect(qc()[1].discountApplied).toBe(500);
     expect(qc()[2]).toMatchObject({ negotiated: true });
   });
+  it("stores a trimmed marketer name only for a sales role on a negotiated quote", async () => {
+    role.value = "sales";
+    await postQuote(req({ input: { packId: "vape-starter", payment: "standard", setupDiscount: 500 }, marketer: "  Thabo " }));
+    expect(qc()[2]).toMatchObject({ marketer: "Thabo", negotiated: true });
+    vi.clearAllMocks(); role.value = null;
+    await postQuote(req({ input: { packId: "vape-starter", payment: "standard", setupDiscount: 500 }, marketer: "Thabo" }));
+    expect(qc()[2].marketer).toBeUndefined();
+  });
+  it("400s on an over-long marketer", async () => {
+    expect((await postQuote(req({ input: { packId: "vape-pro", payment: "standard" }, marketer: "x".repeat(41) }))).status).toBe(400);
+  });
   it("400s on unknown-only ids", async () => {
     const res = await postQuote(req({ input: { productIds: ["bogus"], payment: "standard" } }));
     expect(res.status).toBe(400);

@@ -1,5 +1,6 @@
 import { neon } from "@neondatabase/serverless";
-import { packs, type Pack } from "@/data/catalogue";
+import type { Pack } from "@/data/catalogue";
+import { DEFAULT_FLOORS } from "@/lib/floors";
 import type { QuoteInput, QuoteTotals } from "@/lib/quote";
 
 export type QuoteMeta = {
@@ -115,9 +116,7 @@ async function getOverrides(): Promise<Floors> {
 }
 
 export async function getFloors(): Promise<Floors> {
-  const floors: Floors = {};
-  for (const p of packs) if (p.defaultFloor !== undefined) floors[p.id] = p.defaultFloor;
-  return { ...floors, ...(await getOverrides()) };
+  return { ...DEFAULT_FLOORS, ...(await getOverrides()) };
 }
 
 export async function clearFloor(packId: Pack["id"]): Promise<void> {
@@ -126,7 +125,7 @@ export async function clearFloor(packId: Pack["id"]): Promise<void> {
   await db`update settings set value = value - ${packId}::text where key = 'floors'`;
 }
 
-/** Stores only the override for this pack (defaults stay in the catalogue). */
+/** Stores only the override for this pack (defaults stay in lib/floors). */
 export async function setFloor(packId: Pack["id"], n: number): Promise<void> {
   const db = sql();
   if (!db) { mem.settings.set("floors", { ...(await getOverrides()), [packId]: n }); return; }
