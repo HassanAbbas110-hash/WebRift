@@ -26,7 +26,7 @@ export function PrintQuote({ id, date, validUntil, shop, totals: t, expired }: P
     <article className="quote-doc mx-auto max-w-3xl px-4 py-10 sm:px-6">
       {expired && (
         <div role="status" className="mb-6 rounded-2xl border border-amber-400/40 bg-amber-400/10 p-4 text-sm text-amber-200">
-          This quote expired on {validUntil}. Prices may have changed. <Link href="/quote" className="underline">Build a fresh quote</Link>.
+          Expired, ask for a new quote. This quote was valid until {validUntil}; prices may have changed. <Link href="/quote" className="underline">Build a fresh quote</Link>.
         </div>
       )}
 

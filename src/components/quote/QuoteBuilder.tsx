@@ -55,7 +55,9 @@ export function QuoteBuilder() {
 
   const [floors, setFloors] = useState<Floors | null>(null); // non-null only in sales mode
   const [client, setClient] = useState({ name: "", phone: "", shop: "", consent: false });
-  const [marketer, setMarketer] = useState(() => (typeof window === "undefined" ? "" : localStorage.getItem(MARKETER_KEY) ?? ""));
+  const [marketer, setMarketer] = useState(() => {
+    try { return localStorage.getItem(MARKETER_KEY) ?? ""; } catch { return ""; } // also covers SSR (no localStorage)
+  });
   const [draft, setDraft] = useState({ label: "", setup: "", monthly: "" });
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
@@ -244,9 +246,6 @@ export function QuoteBuilder() {
             <span>I agree that WebRift may store my name and number to follow up on this quote. See our <Link href="/privacy" className="text-cyan underline">privacy policy</Link>.</span>
           </label>
           {error && <p role="alert" className="mt-4 rounded-xl border border-red-400/30 bg-red-400/10 px-3 py-2 text-sm text-red-300">{error}</p>}
-          <button type="submit" disabled={saving} className="bg-grad mt-6 hidden rounded-full px-8 py-3 font-semibold text-white disabled:opacity-40 lg:inline-block">
-            {saving ? "Saving…" : "Save my quote"}
-          </button>
         </fieldset>
       </form>
 
