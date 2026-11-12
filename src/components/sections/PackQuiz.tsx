@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { quizResult, packFigures, type QuizAnswers } from "@/lib/content";
+import { budgetOptions, quizResult, packFigures, type QuizAnswers } from "@/lib/content";
 import { formatZAR } from "@/lib/quote";
 import { SectionHeading, section } from "./SectionHeading";
 
@@ -11,7 +11,7 @@ const QUESTIONS: [Q<"shop">, Q<"site">, Q<"pain">, Q<"budget">] = [
   { key: "shop", title: "What kind of shop do you run?", options: [["vape", "Vape shop"], ["other", "Another kind of shop"]] },
   { key: "site", title: "Do you have a website?", options: [["none", "No, just WhatsApp"], ["basic", "Something basic"], ["yes", "Yes, and it works"]] },
   { key: "pain", title: "What's your main headache?", options: [["found", "People can't find us"], ["orders", "Messy WhatsApp orders"], ["repeat", "Customers don't come back"], ["control", "Stock and cash control"]] },
-  { key: "budget", title: "What setup budget feels right?", options: [["low", "Under R4,500"], ["mid", "R4,500 – R8,000"], ["high", "R8,000+"]] },
+  { key: "budget", title: "What setup budget feels right?", options: budgetOptions() },
 ];
 
 export function PackQuiz() {

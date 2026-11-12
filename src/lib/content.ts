@@ -27,10 +27,19 @@ export function packFigures(packId: Pack["id"]) {
   };
 }
 
-export const packSetupRange = () => {
+/** Cheapest to dearest pack setup, e.g. "R2,200 – R11,000"; sep "–" gives the compact JSON-LD form. */
+export const packSetupRange = (sep = " – ") => {
   const s = packs.map((p) => packFigures(p.id).setup);
-  return `${formatZAR(Math.min(...s))} – ${formatZAR(Math.max(...s))}`;
+  return `${formatZAR(Math.min(...s))}${sep}${formatZAR(Math.max(...s))}`;
 };
+
+const setupOf = (id: Pack["id"]) => packFigures(id).setup;
+/** Quiz budget options, pegged to the vape pack setups so they track price changes. */
+export const budgetOptions = (): [QuizAnswers["budget"], string][] => [
+  ["low", `Under ${formatZAR(setupOf("vape-pro"))}`],
+  ["mid", `${formatZAR(setupOf("vape-pro"))} – ${formatZAR(setupOf("vape-complete"))}`],
+  ["high", `${formatZAR(setupOf("vape-complete"))}+`],
+];
 
 export type QuizAnswers = { shop: "vape" | "other"; site: "none" | "basic" | "yes"; pain: "found" | "orders" | "repeat" | "control"; budget: "low" | "mid" | "high" };
 
@@ -76,8 +85,11 @@ const jsonLdBusiness = () => ({
   name: "WebRift",
   url: SITE_URL,
   telephone: PHONE_TEL,
-  priceRange: "R2,200–R11,000",
+  priceRange: packSetupRange("–"),
   areaServed: cities.map((name) => ({ "@type": "City", name })),
   address: { "@type": "PostalAddress", addressLocality: "Rustenburg", addressCountry: "ZA" },
 });
 export const jsonLd = { faq: jsonLdFaq, business: jsonLdBusiness };
+
+/** JSON for an inline <script>: "<" becomes the 6-char escape < so data can't close the tag. */
+export const serializeJsonLd = (data: object) => JSON.stringify(data).replace(/</g, "\\u003c");

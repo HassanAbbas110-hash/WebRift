@@ -2,7 +2,9 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import sitemap from "@/app/sitemap";
 import { faq } from "@/data/catalogue";
-import { jsonLd, packFigures, quizResult } from "@/lib/content";
+import { budgetOptions, jsonLd, packFigures, quizResult, serializeJsonLd } from "@/lib/content";
+import { formatZAR } from "@/lib/quote";
+import { packs } from "@/data/catalogue";
 
 describe("site content", () => {
   it("sitemap lists every public page", () => {
@@ -17,6 +19,23 @@ describe("site content", () => {
     expect(ld["@type"]).toBe("FAQPage");
     expect(ld.mainEntity).toHaveLength(faq.length);
     expect(ld.mainEntity[0].name).toBe(faq[0].q);
+  });
+
+  it("JSON-LD serialisation escapes </script>", () => {
+    const out = serializeJsonLd({ a: "</script><b>" });
+    expect(out).toContain("\\u003c/script>");
+    expect(out).not.toContain("</script>");
+    expect(JSON.parse(out).a).toBe("</script><b>");
+  });
+
+  it("LocalBusiness priceRange comes from the live pack setups", () => {
+    const s = packs.map((p) => p.setup);
+    expect(jsonLd.business().priceRange).toBe(`${formatZAR(Math.min(...s))}–${formatZAR(Math.max(...s))}`);
+    expect(jsonLd.business().priceRange).toBe("R2,200–R11,000");
+  });
+
+  it("quiz budget labels track the vape pack setups", () => {
+    expect(budgetOptions().map(([, l]) => l)).toEqual(["Under R7,000", "R7,000 – R11,000", "R11,000+"]);
   });
 
   it("LocalBusiness JSON-LD serves the 8 cities", () => {
@@ -34,10 +53,10 @@ describe("site content", () => {
   });
 
   it("pack card and packs page use packFigures, never hard-coded figures", () => {
-    for (const file of ["src/components/sections/PackCard.tsx", "src/app/(site)/packs/page.tsx"]) {
+    for (const file of ["src/components/sections/PackCard.tsx", "src/app/(site)/packs/page.tsx", "src/components/sections/PackQuiz.tsx"]) {
       const src = readFileSync(file, "utf8");
-      expect(src).toContain("packFigures(");
-      expect(src).not.toMatch(/14,?800/);
+      expect(src).toMatch(/packFigures\(|budgetOptions\(/);
+      expect(src).not.toMatch(/R\d{1,3},\d{3}/);
     }
   });
 
