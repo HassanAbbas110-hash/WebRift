@@ -4,16 +4,22 @@ import { Inter, Space_Grotesk } from "next/font/google";
 import { Nav } from "@/components/layout/Nav";
 import { Footer } from "@/components/layout/Footer";
 import { WhatsAppFab } from "@/components/layout/WhatsAppFab";
+import { SITE_URL } from "@/lib/site";
 import "./globals.css";
 import "./print.css";
 
 const inter = Inter({ variable: "--font-inter", subsets: ["latin"] });
 const spaceGrotesk = Space_Grotesk({ variable: "--font-space-grotesk", subsets: ["latin"] });
 
+const description =
+  "Websites, Google visibility and loyalty tools that bring customers back, built for South African shops. WhatsApp-first, live in days, priced for small shops.";
+
 export const metadata: Metadata = {
-  title: { default: "WebRift — Websites that sell for South African shops", template: "%s · WebRift" },
-  description:
-    "WebRift builds premium websites, online stores and digital tools for local South African shops. Get an instant quote.",
+  metadataBase: new URL(SITE_URL),
+  title: { default: "WebRift — Websites & digital tools for South African shops", template: "%s · WebRift" },
+  description,
+  openGraph: { type: "website", locale: "en_ZA", siteName: "WebRift", description },
+  twitter: { card: "summary_large_image" },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

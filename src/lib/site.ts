@@ -17,3 +17,6 @@ export function waLink(text = "Hi WebRift, I'd like to chat about a website for 
   const to = phone ? phone.replace(/\D/g, "").replace(/^00/, "").replace(/^0/, "27") : "27609658641";
   return `https://wa.me/${to}?text=${encodeURIComponent(text)}`;
 }
+
+/** Placeholder domain until the owner confirms it; override with NEXT_PUBLIC_SITE_URL. */
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://webrift.co.za";
