@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #070b1a;
+  --panel: #0d1330;
+  --cyan: #22d3ee;
+  --blue: #3b82f6;
+  --violet: #7c3aed;
+  --grad: linear-gradient(120deg, var(--cyan), var(--blue) 50%, var(--violet));
+  --text: #e8ecf8;
+  --muted: #94a0c0;
+  --line: rgb(255 255 255 / 0.08);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-panel: var(--panel);
+  --color-cyan: var(--cyan);
+  --color-blue: var(--blue);
+  --color-violet: var(--violet);
+  --color-text: var(--text);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-space-grotesk), var(--font-inter), ui-sans-serif, sans-serif;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+::selection {
+  background: rgb(34 211 238 / 0.3);
+}
+
+@utility text-grad {
+  background: var(--grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@utility bg-grad {
+  background: var(--grad);
+}
+
+@utility glass {
+  background: rgb(7 11 26 / 0.72);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
