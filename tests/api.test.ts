@@ -44,6 +44,16 @@ describe("POST /api/quotes", () => {
     expect(qc()[1].discountApplied).toBe(500);
     expect(qc()[2]).toMatchObject({ negotiated: true });
   });
+  it("400s on unknown-only ids", async () => {
+    const res = await postQuote(req({ input: { productIds: ["bogus"], payment: "standard" } }));
+    expect(res.status).toBe(400);
+    expect(db.createQuote).not.toHaveBeenCalled();
+  });
+  it("strips customLines without a role", async () => {
+    await postQuote(req({ input: { packId: "vape-pro", payment: "standard", customLines: [{ label: "x", setup: 100, monthly: 0 }] } }));
+    expect(qc()[1].setup).toBe(7000);
+    expect(qc()[2].negotiated).toBeFalsy();
+  });
   it("requires consent when client details are given", async () => {
     const body = { input: { packId: "vape-pro", payment: "standard" }, client: { name: "A", phone: "081 717 9974", consent: false } };
     expect((await postQuote(req(body))).status).toBe(400);

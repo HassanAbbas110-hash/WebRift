@@ -51,24 +51,27 @@ export async function createQuote(input: QuoteInput, totals: QuoteTotals, meta: 
   const rows = await db`
     with n as (select nextval(pg_get_serial_sequence('quotes', 'seq')) as s)
     insert into quotes (id, seq, valid_until, input, totals, client_name, client_phone, shop_name, marketer, negotiated)
-    select 'WR-' || ${year}::text || '-' || lpad(n.s::text, 4, '0'), n.s, ${validUntil}::date,
+    select 'WR-' || ${year}::text || '-' || case when n.s < 10000 then lpad(n.s::text, 4, '0') else n.s::text end, n.s, ${validUntil}::date,
       ${JSON.stringify(input)}::jsonb, ${JSON.stringify(totals)}::jsonb,
       ${c?.name ?? null}, ${c?.phone ?? null}, ${c?.shop ?? null}, ${meta.marketer ?? null}, ${!!meta.negotiated}
     from n returning id`;
   return { id: rows[0].id as string, validUntil };
 }
 
+// neon returns timestamptz as Date; normalise so both paths give an ISO string.
+const iso = (r: QuoteRow): QuoteRow => ({ ...r, created_at: new Date(r.created_at).toISOString() });
+
 export async function getQuote(id: string): Promise<QuoteRow | null> {
   const db = sql();
   if (!db) return mem.quotes.find((q) => q.id === id) ?? null;
   const rows = (await db`select id, seq, created_at, to_char(valid_until, 'YYYY-MM-DD') as valid_until, input, totals, client_name, client_phone, shop_name, marketer, negotiated, status from quotes where id = ${id}`) as QuoteRow[];
-  return rows[0] ?? null;
+  return rows[0] ? iso(rows[0]) : null;
 }
 
 export async function listQuotes(): Promise<QuoteRow[]> {
   const db = sql();
   if (!db) return [...mem.quotes].reverse();
-  return (await db`select id, seq, created_at, to_char(valid_until, 'YYYY-MM-DD') as valid_until, input, totals, client_name, client_phone, shop_name, marketer, negotiated, status from quotes order by seq desc`) as QuoteRow[];
+  return ((await db`select id, seq, created_at, to_char(valid_until, 'YYYY-MM-DD') as valid_until, input, totals, client_name, client_phone, shop_name, marketer, negotiated, status from quotes order by seq desc`) as QuoteRow[]).map(iso);
 }
 
 export async function createLead(l: LeadInput): Promise<{ id: string }> {
@@ -89,7 +92,7 @@ export async function createLead(l: LeadInput): Promise<{ id: string }> {
 export async function listLeads(): Promise<LeadRow[]> {
   const db = sql();
   if (!db) return [...mem.leads].reverse();
-  return (await db`select * from leads order by created_at desc`) as LeadRow[];
+  return ((await db`select * from leads order by created_at desc`) as LeadRow[]).map((r) => ({ ...r, created_at: new Date(r.created_at).toISOString() }));
 }
 
 export async function updateStatus(table: Table, id: string, status: string): Promise<void> {
@@ -104,20 +107,23 @@ export async function updateStatus(table: Table, id: string, status: string): Pr
   else await db`update leads set status = ${status} where id = ${id}`;
 }
 
+async function getOverrides(): Promise<Floors> {
+  const db = sql();
+  return (db
+    ? ((await db`select value from settings where key = 'floors'`)[0]?.value as Floors | undefined)
+    : (mem.settings.get("floors") as Floors | undefined)) ?? {};
+}
+
 export async function getFloors(): Promise<Floors> {
   const floors: Floors = {};
   for (const p of packs) if (p.defaultFloor !== undefined) floors[p.id] = p.defaultFloor;
-  const db = sql();
-  const stored = db
-    ? ((await db`select value from settings where key = 'floors'`)[0]?.value as Floors | undefined)
-    : (mem.settings.get("floors") as Floors | undefined);
-  return { ...floors, ...stored };
+  return { ...floors, ...(await getOverrides()) };
 }
 
+/** Stores only the override for this pack (defaults stay in the catalogue). */
 export async function setFloor(packId: Pack["id"], n: number): Promise<void> {
-  const next = { ...(await getFloors()), [packId]: n };
   const db = sql();
-  if (!db) { mem.settings.set("floors", next); return; }
-  await db`insert into settings (key, value) values ('floors', ${JSON.stringify(next)}::jsonb)
-    on conflict (key) do update set value = excluded.value`;
+  if (!db) { mem.settings.set("floors", { ...(await getOverrides()), [packId]: n }); return; }
+  await db`insert into settings (key, value) values ('floors', jsonb_build_object(${packId}::text, ${n}::int))
+    on conflict (key) do update set value = coalesce(settings.value, '{}'::jsonb) || jsonb_build_object(${packId}::text, ${n}::int)`;
 }

@@ -1,14 +1,11 @@
 import { z } from "zod";
 import { getRole } from "@/lib/auth";
 import { createQuote, getFloors } from "@/lib/db";
+import { phoneSchema as phone } from "@/lib/validation";
 import { computeQuote, type QuoteInput } from "@/lib/quote";
 
 const ids = z.array(z.string().max(40)).max(40);
 const int = (max: number) => z.number().int().min(0).max(max);
-const phone = z.string().regex(/^[\d\s+]+$/).refine((s) => {
-  const n = s.replace(/\D/g, "").length;
-  return n >= 9 && n <= 15;
-});
 const Body = z.object({
   input: z.object({
     packId: z.enum(["vape-starter", "vape-pro", "vape-complete", "retail-starter", "retail-online", "repeat-combo"]).optional(),
@@ -39,6 +36,7 @@ export async function POST(req: Request) {
   }
 
   const totals = computeQuote(input, await getFloors());
+  if (totals.lines.length === 0) return Response.json({ error: "Empty quote" }, { status: 400 });
   const negotiated = !!role && (totals.discountApplied > 0 || !!input.customLines?.length);
   const { id, validUntil } = await createQuote(input, totals, {
     client: client && { name: client.name, phone: client.phone, shop: client.shop },
