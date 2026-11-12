@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SalesModeToggle } from "@/components/quote/SalesModeToggle";
 import { Logo } from "@/components/brand/Logo";
 import { CONTACT_EMAIL, NAV_LINKS, PHONE_DISPLAY, PHONE_TEL, WHATSAPP_DISPLAY, waLink } from "@/lib/site";
 
@@ -52,9 +53,12 @@ export function Footer() {
       <div className="border-t border-line">
         <div className="mx-auto flex max-w-7xl flex-col gap-2 px-4 pt-6 pb-24 text-xs text-muted sm:flex-row sm:justify-between sm:pr-24 sm:pb-6 sm:pl-6">
           <p>© WebRift. Prices in ZAR, excluding VAT.</p>
-          <Link href="/privacy" className="hover:text-cyan">
-            Privacy policy
-          </Link>
+          <span className="flex items-center gap-4">
+            <Link href="/privacy" className="hover:text-cyan">
+              Privacy policy
+            </Link>
+            <SalesModeToggle />
+          </span>
         </div>
       </div>
     </footer>
