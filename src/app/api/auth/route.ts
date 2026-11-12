@@ -20,13 +20,13 @@ const cookie = (value: string, maxAge: number) =>
 export async function POST(req: Request) {
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || "unknown";
   const now = Date.now();
-  const t = tries.get(ip);
-  if (t && t.reset < now) tries.delete(ip);
+  for (const [k, v] of tries) if (v.reset < now) tries.delete(k);
   if ((tries.get(ip)?.n ?? 0) >= MAX) return Response.json({ error: "Too many tries" }, { status: 429 });
 
   const parsed = Body.safeParse(await req.json().catch(() => null));
   if (!parsed.success) return Response.json({ error: "Invalid" }, { status: 400 });
   const b = parsed.data;
+  if (!process.env.AUTH_SECRET) return Response.json({ error: "Wrong" }, { status: 401 });
   const ok = b.kind === "sales" ? same(b.pin, process.env.SALES_PIN) : same(b.password, process.env.ADMIN_PASSWORD);
   if (!ok) {
     const cur = tries.get(ip) ?? { n: 0, reset: now + WINDOW };

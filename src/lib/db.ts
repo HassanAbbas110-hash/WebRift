@@ -120,6 +120,12 @@ export async function getFloors(): Promise<Floors> {
   return { ...floors, ...(await getOverrides()) };
 }
 
+export async function clearFloor(packId: Pack["id"]): Promise<void> {
+  const db = sql();
+  if (!db) { const { [packId]: _, ...rest } = await getOverrides(); mem.settings.set("floors", rest); return; }
+  await db`update settings set value = value - ${packId}::text where key = 'floors'`;
+}
+
 /** Stores only the override for this pack (defaults stay in the catalogue). */
 export async function setFloor(packId: Pack["id"], n: number): Promise<void> {
   const db = sql();

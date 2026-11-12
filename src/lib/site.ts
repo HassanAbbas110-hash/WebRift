@@ -14,6 +14,6 @@ export const NAV_LINKS = [
 
 /** phone: a client's number (SA local 0xx becomes 27xx); omitted means WebRift's own line. */
 export function waLink(text = "Hi WebRift, I'd like to chat about a website for my shop.", phone?: string) {
-  const to = phone ? phone.replace(/\D/g, "").replace(/^0/, "27") : "27609658641";
+  const to = phone ? phone.replace(/\D/g, "").replace(/^00/, "").replace(/^0/, "27") : "27609658641";
   return `https://wa.me/${to}?text=${encodeURIComponent(text)}`;
 }

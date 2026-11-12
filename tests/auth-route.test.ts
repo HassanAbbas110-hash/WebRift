@@ -3,10 +3,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const role = vi.hoisted(() => ({ value: null as "sales" | "admin" | null }));
 vi.mock("next/headers", () => ({ cookies: async () => ({ get: () => undefined }) }));
 vi.mock("@/lib/auth", async (orig) => ({ ...(await orig<typeof import("@/lib/auth")>()), getRole: async () => role.value }));
-vi.mock("@/lib/db", () => ({ updateStatus: vi.fn(), setFloor: vi.fn(), getFloors: vi.fn() }));
+vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
+vi.mock("@/lib/db", () => ({ updateStatus: vi.fn(), setFloor: vi.fn(), clearFloor: vi.fn(), getFloors: vi.fn() }));
 
 import { GET, POST, DELETE } from "@/app/api/auth/route";
 import { assertAdmin } from "@/lib/admin";
+import * as db from "@/lib/db";
+import { saveFloors, setStatus } from "@/app/admin/actions";
 
 let n = 0;
 const post = (body: unknown, ip = `1.1.1.${++n}`) =>
@@ -35,6 +38,10 @@ describe("/api/auth", () => {
     delete process.env.SALES_PIN;
     expect((await post({ kind: "sales", pin: "" })).status).toBe(401);
   });
+  it("unset AUTH_SECRET with correct pin is 401, not 500", async () => {
+    delete process.env.AUTH_SECRET;
+    expect((await post({ kind: "sales", pin: "1234" })).status).toBe(401);
+  });
   it("GET returns role", async () => {
     role.value = "sales";
     expect(await (await GET()).json()).toEqual({ role: "sales" });
@@ -54,5 +61,17 @@ describe("assertAdmin", () => {
   it("passes admin", async () => {
     role.value = "admin";
     await expect(assertAdmin()).resolves.toBeUndefined();
+  });
+});
+
+describe("admin actions", () => {
+  const fd = (o: Record<string, string>) => { const f = new FormData(); for (const k in o) f.set(k, o[k]); return f; };
+  it.each(["sales", null] as const)("reject role %s without touching db", async (r) => {
+    role.value = r;
+    await expect(setStatus(fd({ table: "quotes", id: "x", status: "won" }))).rejects.toThrow();
+    await expect(saveFloors(fd({ "vape-pro": "100", "vape-starter": "" }))).rejects.toThrow();
+    expect(db.updateStatus).not.toHaveBeenCalled();
+    expect(db.setFloor).not.toHaveBeenCalled();
+    expect(db.clearFloor).not.toHaveBeenCalled();
   });
 });

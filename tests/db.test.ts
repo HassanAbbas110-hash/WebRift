@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getFloors, setFloor, validUntilFrom } from "@/lib/db";
+import { clearFloor, getFloors, setFloor, validUntilFrom } from "@/lib/db";
 
 describe("db helpers", () => {
   it("validUntil uses the Johannesburg date + 14 days", () => {
@@ -10,5 +10,10 @@ describe("db helpers", () => {
     expect(await getFloors()).toMatchObject({ "vape-pro": 6000, "vape-starter": 3500 });
     await setFloor("vape-starter", 3000);
     expect((await getFloors())["vape-pro"]).toBe(6000);
+  });
+  it("clearFloor removes the override, back to catalogue default", async () => {
+    await setFloor("vape-starter", 3000);
+    await clearFloor("vape-starter");
+    expect((await getFloors())["vape-starter"]).toBe(3500);
   });
 });
