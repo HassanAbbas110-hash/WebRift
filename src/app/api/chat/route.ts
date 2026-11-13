@@ -31,9 +31,14 @@ export async function POST(req: Request) {
       maxOutputTokens: 800,
     });
     return createUIMessageStreamResponse({
-      stream: toUIMessageStream({ stream: result.stream, onError: () => "offline" }),
+      stream: toUIMessageStream({ stream: result.stream, onError: (e) => {
+        // Logged so the owner can see in Vercel logs why the assistant is offline; visitors only see "offline".
+        console.error("chat stream failed:", e instanceof Error ? e.message : String(e));
+        return "offline";
+      } }),
     });
-  } catch {
+  } catch (e) {
+    console.error("chat failed:", e instanceof Error ? e.message : String(e));
     return offline();
   }
 }
