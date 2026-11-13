@@ -18,7 +18,7 @@ async function SavedQuote({ params }: { params: PageProps<"/q/[id]">["params"] }
   // Anyone with the link can open it: only the shop name is shown, never the client's name or number.
   return (
     <PrintQuote
-      id={q.id} token={q.token} negotiated={q.negotiated} marketer={q.marketer} date={long(createdJhb)} validUntil={long(q.valid_until)} shop={q.shop_name}
+      id={q.id} token={q.token} negotiated={q.negotiated} marketer={q.marketer === "sales" || q.marketer === "admin" ? null : q.marketer} date={long(createdJhb)} validUntil={long(q.valid_until)} shop={q.shop_name}
       totals={q.totals} expired={quoteStatus(q.valid_until, new Date()) === "expired"}
     />
   );
