@@ -45,8 +45,14 @@ Click **Team** in the footer and enter the `SALES_PIN`. On the quote page a disc
 ## Security notes
 
 - Use a long `SALES_PIN` (8+ characters) and a strong `ADMIN_PASSWORD`. The login rate limit is per server instance, so it is not a hard guarantee.
-- The public form endpoints (quotes, leads, chat) have no rate limit yet. If spam appears, turn on Vercel Firewall rate limiting or BotID.
+- The chat has a rate limit of 30 messages per 10 minutes per IP, counted per server instance (so not a hard guarantee). The quote and lead endpoints have no rate limit of their own; see the checklist below.
 - The AI assistant shows "offline" until the gateway key is set.
+
+## Before go-live
+
+- [ ] Set a spend limit on the AI Gateway (Vercel dashboard → AI Gateway).
+- [ ] Add a Vercel Firewall rate-limit rule for `/api/*`.
+- [ ] Set `DATABASE_URL` (without it, production pages that need the database show an error instead of keeping quotes and leads in memory) and run `node scripts/migrate.mjs`.
 
 ## Known limits / not yet verified
 

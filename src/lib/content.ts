@@ -16,7 +16,14 @@ export const CATEGORIES: { id: Category; label: string; blurb: string; icon: str
 export function packFigures(packId: Pack["id"]) {
   const pack = packs.find((p) => p.id === packId)!;
   const t = computeQuote({ packId, productIds: [], extraIds: [], payment: "instalments" }, {});
+  const items = pack.productIds.map((id) => productById(id)!);
+  const vape = pack.audience === "VAPE SHOPS";
+  const separatelySetup = items.reduce((n, p) => n + p.setup + (p.separateExtra && (vape || !p.separateExtra.vapeOnly) ? p.separateExtra.setup : 0), 0);
+  const separatelyMonthly = items.reduce((n, p) => n + p.monthly, 0);
   return {
+    separatelySetup,
+    separatelyMonthly,
+    saveVsSeparately: separatelySetup + 12 * separatelyMonthly - t.year1,
     pack,
     setup: t.setup,
     monthly: t.monthly,
@@ -24,6 +31,16 @@ export function packFigures(packId: Pack["id"]) {
     youSave: t.saveVsMarket,
     instalment: t.instalment ?? 0,
     prepay: t.prepayTotal,
+  };
+}
+
+/** Pack card lines vs buying the same items one by one; null when the pack isn't cheaper on that figure. */
+export function packSavingsCopy(packId: Pack["id"]) {
+  const f = packFigures(packId);
+  const setupLess = f.separatelySetup - f.setup, monthlyLess = f.separatelyMonthly - f.monthly;
+  return {
+    setup: setupLess > 0 ? `Setup is ${formatZAR(setupLess)} lower than buying the items one by one (${Math.round((100 * setupLess) / f.separatelySetup)}% off)` : null,
+    monthly: monthlyLess > 0 ? `Monthly is ${formatZAR(monthlyLess)} lower` : null,
   };
 }
 

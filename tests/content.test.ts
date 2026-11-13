@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import sitemap from "@/app/sitemap";
 import { faq } from "@/data/catalogue";
-import { budgetOptions, jsonLd, packFigures, quizResult, serializeJsonLd } from "@/lib/content";
+import { budgetOptions, jsonLd, packFigures, packSavingsCopy, quizResult, serializeJsonLd } from "@/lib/content";
 import { formatZAR } from "@/lib/quote";
 import { packs } from "@/data/catalogue";
 
@@ -50,6 +50,24 @@ describe("site content", () => {
     expect(f.instalment).toBe(Math.ceil(7000 / 3));
     expect(f.prepay).toBe(7000 + 10 * 650);
     expect(f.youSave).toBe(55650 - 14800);
+  });
+
+  it("bought-separately figures sum the pack's products from the catalogue", () => {
+    const sep = (id: Parameters<typeof packFigures>[0]) => {
+      const f = packFigures(id);
+      return [f.separatelySetup, f.separatelyMonthly, f.saveVsSeparately];
+    };
+    expect(sep("vape-starter")).toEqual([6750, 780, 6110]);
+    expect(sep("vape-pro")).toEqual([14200, 1560, 18120]);
+    expect(sep("vape-complete")).toEqual([18650, 2930, 33810]);
+    for (const p of packs) {
+      const f = packFigures(p.id);
+      expect(f.separatelySetup + 12 * f.separatelyMonthly, p.id).toBe(p.separatelyY1);
+    }
+    expect(packSavingsCopy("vape-pro")).toEqual({
+      setup: "Setup is R7,200 lower than buying the items one by one (51% off)",
+      monthly: "Monthly is R910 lower",
+    });
   });
 
   it("pack card and packs page use packFigures, never hard-coded figures", () => {

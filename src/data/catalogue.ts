@@ -21,6 +21,8 @@ export type Product = {
   adoption: number;
   rating: number;
   monthlyOnly?: boolean;
+  /** Setup add-on the catalogue counts in a pack's "bought separately" total (vape edition, WhatsApp setup). */
+  separateExtra?: { setup: number; vapeOnly?: boolean };
 };
 
 export type Pack = {
@@ -49,7 +51,7 @@ export const products: Product[] = [
     setup: 3500, monthly: 500,
     market: { low: 4500, avg: 7000, high: 9500 }, marketMonthly: { low: 350, high: 850, avg: 600 },
     note: "Vape edition +R700. Monthly: hosting and support. Edits R120 each (free in packs).",
-    vapeFit: "High", adoption: 90, rating: 10,
+    vapeFit: "High", adoption: 90, rating: 10, separateExtra: { setup: 700, vapeOnly: true },
   },
   {
     id: "age-check", num: 2, name: "18+ Age Check & Compliance Setup", category: "storefront",
@@ -119,7 +121,7 @@ export const products: Product[] = [
     setup: 1000, monthly: 0,
     market: { low: 800, avg: 1400, high: 2000 },
     note: "R1,000 per platform; WhatsApp Business setup adds R500. Vape shops: information pages only, no sales content or ads (platform rules).",
-    vapeFit: "Medium", adoption: 80, rating: 8,
+    vapeFit: "Medium", adoption: 80, rating: 8, separateExtra: { setup: 500 },
   },
   {
     id: "domain-email", num: 9, name: "Domain, Hosting & Business Email", category: "found",

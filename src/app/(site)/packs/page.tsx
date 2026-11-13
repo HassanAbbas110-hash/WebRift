@@ -72,13 +72,14 @@ export default function PacksPage() {
         <section className="mt-24">
           <h2 className="font-display text-3xl font-bold tracking-tight sm:text-4xl">What you save in year 1</h2>
           <div className="card relative mt-6 overflow-x-auto">
-            <table className="w-full min-w-[44rem] text-right text-sm tabular-nums">
+            <table className="w-full min-w-[52rem] text-right text-sm tabular-nums">
               <thead>
                 <tr className="border-b border-line text-muted">
                   <th scope="col" className={`${th} text-left`}>Pack</th>
                   <th scope="col" className={th}>Typical market</th>
                   <th scope="col" className={th}>Our tools bought separately</th>
                   <th scope="col" className={th}>Pack, year 1</th>
+                  <th scope="col" className={th}>Save vs separately</th>
                   <th scope="col" className={th}>You save vs market</th>
                 </tr>
               </thead>
@@ -89,8 +90,9 @@ export default function PacksPage() {
                     <tr key={p.id} className="border-b border-line last:border-0">
                       <th scope="row" className="p-3 text-left font-semibold">{p.name}</th>
                       <td className="p-3 text-muted">{formatZAR(p.marketY1)}</td>
-                      <td className="p-3 text-muted">{formatZAR(p.separatelyY1)}</td>
+                      <td className="p-3 text-muted">{formatZAR(f.separatelySetup + 12 * f.separatelyMonthly)}</td>
                       <td className="p-3 font-semibold">{formatZAR(f.year1)}</td>
+                      <td className="p-3 font-semibold">{formatZAR(f.saveVsSeparately)}</td>
                       <td className="text-grad p-3 font-bold">{formatZAR(f.youSave)}</td>
                     </tr>
                   );

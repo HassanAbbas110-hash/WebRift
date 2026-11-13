@@ -1,7 +1,7 @@
 // Pure chat helpers shared by the widget (client) and the chat route (server).
 import type { UIMessage } from "ai";
 
-export const MAX_MESSAGES = 40, MAX_USER_CHARS = 1000, MAX_ASSISTANT_CHARS = 4000, MAX_TOTAL_CHARS = 60_000, MAX_LINE_CHARS = 2000;
+export const MAX_MESSAGES = 40, MAX_USER_CHARS = 1000, MAX_ASSISTANT_CHARS = 16_000, MAX_TOTAL_CHARS = 60_000, MAX_LINE_CHARS = 2000;
 
 export type TranscriptLine = { role: "user" | "assistant"; text: string };
 export type LeadProposal = { name: string; phone: string; shop?: string; summary: string; intent: number };

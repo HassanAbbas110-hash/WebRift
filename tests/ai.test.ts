@@ -78,8 +78,9 @@ describe("sanitizeMessages", () => {
     expect(sanitizeMessages(Array.from({ length: 41 }, (_, i) => msg(i % 2 ? "assistant" : "user", "x")))).toHaveProperty("error");
     expect(sanitizeMessages([msg("user", "x".repeat(1001))])).toHaveProperty("error");
     expect(sanitizeMessages([msg("user", "x".repeat(1000))])).toHaveProperty("messages");
-    expect(sanitizeMessages([msg("user", "x"), msg("assistant", "x".repeat(4001))])).toHaveProperty("error");
-    const big = Array.from({ length: 40 }, (_, i) => msg(i % 2 ? "assistant" : "user", "x".repeat(i % 2 ? 4000 : 1000)));
+    expect(sanitizeMessages([msg("user", "x"), msg("assistant", "x".repeat(16_001))])).toHaveProperty("error");
+    expect(sanitizeMessages([msg("user", "x"), msg("assistant", "x".repeat(16_000))])).toHaveProperty("messages");
+    const big = Array.from({ length: 40 }, (_, i) => msg(i % 2 ? "assistant" : "user", "x".repeat(i % 2 ? 16_000 : 1000)));
     expect(sanitizeMessages(big)).toEqual({ error: "Conversation too long" });
     expect(sanitizeMessages("nope")).toHaveProperty("error");
     expect(sanitizeMessages([msg("assistant", "hi")])).toHaveProperty("error");
@@ -88,7 +89,7 @@ describe("sanitizeMessages", () => {
 
 describe("client helpers", () => {
   it("recentMessages keeps the last 40 within the total cap", () => {
-    const many = Array.from({ length: 50 }, (_, i) => msg(i % 2 ? "assistant" : "user", "x".repeat(i % 2 ? 4000 : 1000)));
+    const many = Array.from({ length: 50 }, (_, i) => msg(i % 2 ? "assistant" : "user", "x".repeat(i % 2 ? 16_000 : 1000)));
     const r = recentMessages(many as UIMessage[]);
     expect(r.length).toBeLessThanOrEqual(40);
     expect(r.at(-1)).toBe(many.at(-1));

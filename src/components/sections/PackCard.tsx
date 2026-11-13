@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { productById, type Pack } from "@/data/catalogue";
-import { packFigures } from "@/lib/content";
+import { packFigures, packSavingsCopy } from "@/lib/content";
 import { formatZAR } from "@/lib/quote";
 
 export function PackCard({ id, detailed }: { id: Pack["id"]; detailed?: boolean }) {
   const f = packFigures(id);
   const { pack } = f;
+  const vsSeparate = packSavingsCopy(id);
   return (
     <article
       className={`card relative flex h-full flex-col p-7 ${pack.popular ? "border-cyan/50 bg-cyan/[0.04] shadow-[0_30px_80px_-30px_rgba(34,211,238,0.5)]" : ""}`}
@@ -41,6 +42,12 @@ export function PackCard({ id, detailed }: { id: Pack["id"]; detailed?: boolean 
                   <span className="text-muted line-through">{formatZAR(b.worth)}</span>
                 </li>
               ))}
+            </ul>
+          )}
+          {(vsSeparate.setup || vsSeparate.monthly) && (
+            <ul className="mt-4 space-y-1 border-t border-line pt-4 text-xs text-muted">
+              {vsSeparate.setup && <li>{vsSeparate.setup}</li>}
+              {vsSeparate.monthly && <li>{vsSeparate.monthly}</li>}
             </ul>
           )}
           <dl className="mt-4 grid grid-cols-2 gap-3 border-t border-line pt-4 text-xs">
