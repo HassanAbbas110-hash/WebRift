@@ -3,7 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 
 // Flowing fbm noise in the brand colours (cyan #22d3ee, blue #3b82f6, violet #7c3aed) on the page background #070b1a.
-const FRAG = `precision mediump float;
+// highp where available: the sin-hash needs fp32, and fp16 mediump on many mobile GPUs would flatten the noise.
+const FRAG = `#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;
+#else
+precision mediump float;
+#endif
 uniform vec2 r;uniform float t;uniform vec2 m;
 float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);
@@ -25,16 +30,27 @@ col=mix(bg,col,smoothstep(0.,.45,uv.y));
 gl_FragColor=vec4(col,1.);}`;
 const VERT = "attribute vec2 p;void main(){gl_Position=vec4(p,0,1);}";
 
-/** Raw WebGL hero background. Pauses off-screen and in hidden tabs; renders nothing if WebGL fails. */
+/** Raw WebGL hero background. Pauses off-screen and in hidden tabs; leaves the CSS gradient showing if WebGL fails or is lost. */
 export default function HeroShader() {
-  const ref = useRef<HTMLCanvasElement>(null);
-  const [state, setState] = useState<"loading" | "on" | "failed">("loading");
+  const ref = useRef<HTMLDivElement>(null);
+  const [on, setOn] = useState(false); // fades in after the first frame
 
   useEffect(() => {
-    const canvas = ref.current!;
-    const gl = canvas.getContext("webgl", { antialias: false, alpha: false, powerPreference: "low-power" });
-    const prog = gl && build(gl);
-    if (!gl || !prog) return setState("failed");
+    // A fresh canvas per effect run: Activity (cacheComponents) re-runs this effect on the same DOM after hiding it,
+    // and getContext on the old canvas would return the context we deliberately lost in cleanup.
+    const host = ref.current!;
+    const canvas = document.createElement("canvas");
+    canvas.className = "block size-full";
+    host.append(canvas);
+    // failIfMajorPerformanceCaveat: software WebGL gets the static gradient instead.
+    const gl = canvas.getContext("webgl", { antialias: false, alpha: false, powerPreference: "low-power", failIfMajorPerformanceCaveat: true });
+    const res = gl ? build(gl) : null;
+    if (!gl || !res || !res.ok) {
+      if (gl && res) dispose(gl, res);
+      canvas.remove(); // the empty host leaves the static gradient visible
+      return;
+    }
+    const prog = res.prog!;
 
     const uR = gl.getUniformLocation(prog, "r");
     const uT = gl.getUniformLocation(prog, "t");
@@ -71,14 +87,14 @@ export default function HeroShader() {
       gl.uniform1f(uT, (now - t0) / 1000);
       gl.uniform2f(uM, cur.x, cur.y);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
-      if (first) { first = false; setState("on"); }
+      if (first) { first = false; setOn(true); }
       loop();
     };
     const loop = () => { if (!raf && visible && !document.hidden) raf = requestAnimationFrame(frame); };
     const io = new IntersectionObserver(([e]) => { visible = e.isIntersecting; loop(); });
     io.observe(canvas);
     const onVis = () => loop();
-    const onLost = (e: Event) => { e.preventDefault(); cancelAnimationFrame(raf); setState("failed"); };
+    const onLost = () => { cancelAnimationFrame(raf); canvas.remove(); }; // fall back to the gradient
     const ro = new ResizeObserver(resize);
     ro.observe(canvas);
     window.addEventListener("pointermove", onPointer, { passive: true });
@@ -94,36 +110,51 @@ export default function HeroShader() {
       window.removeEventListener("pointermove", onPointer);
       window.removeEventListener("deviceorientation", onTilt);
       document.removeEventListener("visibilitychange", onVis);
-      canvas.removeEventListener("webglcontextlost", onLost);
+      canvas.removeEventListener("webglcontextlost", onLost); // before loseContext, so our own loss is not treated as a failure
+      dispose(gl, res);
+      canvas.remove();
     };
   }, []);
 
-  if (state === "failed") return null; // the static CSS gradient underneath stays visible
   return (
-    <canvas
+    <div
       ref={ref}
-      className={`absolute inset-0 size-full transition-opacity duration-1000 ${state === "on" ? "opacity-100" : "opacity-0"}`}
+      className={`absolute inset-0 transition-opacity duration-1000 ${on ? "opacity-100" : "opacity-0"}`}
     />
   );
 }
 
-function build(gl: WebGLRenderingContext) {
-  const prog = gl.createProgram();
+type Res = { ok: boolean; prog: WebGLProgram | null; shaders: WebGLShader[]; buf: WebGLBuffer | null };
+
+function build(gl: WebGLRenderingContext): Res {
+  const res: Res = { ok: false, prog: gl.createProgram(), shaders: [], buf: null };
+  if (!res.prog) return res;
   for (const [type, src] of [[gl.VERTEX_SHADER, VERT], [gl.FRAGMENT_SHADER, FRAG]] as const) {
     const s = gl.createShader(type);
-    if (!s || !prog) return null;
+    if (!s) return res;
+    res.shaders.push(s);
     gl.shaderSource(s, src);
     gl.compileShader(s);
-    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) return null;
-    gl.attachShader(prog, s);
+    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) return res;
+    gl.attachShader(res.prog, s);
   }
-  gl.bindAttribLocation(prog!, 0, "p");
-  gl.linkProgram(prog!);
-  if (!gl.getProgramParameter(prog!, gl.LINK_STATUS)) return null;
-  gl.useProgram(prog);
-  gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+  gl.bindAttribLocation(res.prog, 0, "p");
+  gl.linkProgram(res.prog);
+  if (!gl.getProgramParameter(res.prog, gl.LINK_STATUS)) return res;
+  gl.useProgram(res.prog);
+  res.buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, res.buf);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW); // one oversized triangle covers the screen
   gl.enableVertexAttribArray(0);
   gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
-  return prog;
+  res.ok = true;
+  return res;
+}
+
+/** Frees GPU objects and the context itself, so home -> elsewhere -> home loops don't pile up contexts. */
+function dispose(gl: WebGLRenderingContext, res: Res) {
+  gl.deleteProgram(res.prog);
+  res.shaders.forEach((s) => gl.deleteShader(s));
+  gl.deleteBuffer(res.buf);
+  gl.getExtension("WEBGL_lose_context")?.loseContext();
 }
