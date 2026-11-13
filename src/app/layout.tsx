@@ -4,6 +4,7 @@ import { Inter, Space_Grotesk } from "next/font/google";
 import { Nav } from "@/components/layout/Nav";
 import { Footer } from "@/components/layout/Footer";
 import { WhatsAppFab } from "@/components/layout/WhatsAppFab";
+import { ChatLauncher } from "@/components/chat/ChatLauncher";
 import { SITE_URL } from "@/lib/site";
 import "./globals.css";
 import "./print.css";
@@ -32,6 +33,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </Suspense>
         <main className="flex-1">{children}</main>
         <Footer />
+        <ChatLauncher />
         <WhatsAppFab />
       </body>
     </html>

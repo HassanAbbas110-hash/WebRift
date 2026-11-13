@@ -60,6 +60,9 @@ body {
   body:has([data-sheet]) [data-fab] {
     bottom: 13rem;
   }
+  body:has([data-sheet]) [data-chat-launcher] {
+    bottom: 17.5rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
