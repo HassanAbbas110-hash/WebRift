@@ -1,14 +1,19 @@
 "use client";
 import { useChat } from "@ai-sdk/react";
-import type { UIMessage } from "ai";
+import { DefaultChatTransport, type UIMessage } from "ai";
 import Link from "next/link";
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { recentMessages } from "@/lib/chat";
 import { waLink } from "@/lib/site";
 import { ChatMessages } from "./ChatMessages";
+import type { LeadOutcome } from "./LeadCard";
 
 const KEY = "wr-chat";
 const MAX_CHARS = 1000;
 const STARTERS = ["Which pack fits my shop?", "What does Vape Pro include?", "How does pricing work?", "Do you do Google Maps?"];
+
+// Only the recent window goes to the server, so long chats keep working.
+const transport = new DefaultChatTransport({ prepareSendMessagesRequest: ({ id, messages }) => ({ body: { id, messages: recentMessages(messages) } }) });
 
 const load = (): UIMessage[] => {
   try { return JSON.parse(sessionStorage.getItem(KEY) ?? "[]"); } catch { return []; }
@@ -16,7 +21,7 @@ const load = (): UIMessage[] => {
 
 export function ChatWidget({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [initial] = useState(load);
-  const { messages, sendMessage, status, error, setMessages, clearError, stop } = useChat({ messages: initial });
+  const { messages, sendMessage, status, error, setMessages, clearError, stop } = useChat({ messages: initial, transport });
   const [input, setInput] = useState("");
   const box = useRef<HTMLDivElement>(null);
   const field = useRef<HTMLTextAreaElement>(null);
@@ -43,6 +48,13 @@ export function ChatWidget({ open, onClose }: { open: boolean; onClose: () => vo
     field.current?.focus();
   };
 
+  // The confirm card's result lives in the client's own copy of the tool output.
+  const onLead = (toolCallId: string, outcome: LeadOutcome) =>
+    setMessages((ms) => ms.map((m) => ({
+      ...m,
+      parts: m.parts.map((p) => ("toolCallId" in p && p.toolCallId === toolCallId && "output" in p ? { ...p, output: { ...(p.output as object), outcome } } : p)) as UIMessage["parts"],
+    })));
+
   // Escape closes; Tab stays inside the dialog.
   const onKeyDown = (e: KeyboardEvent) => {
     if (e.key === "Escape") { e.stopPropagation(); onClose(); return; }
@@ -53,7 +65,10 @@ export function ChatWidget({ open, onClose }: { open: boolean; onClose: () => vo
     else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
   };
 
-  const limited = error?.message.includes("Too many");
+  const code = (error as { statusCode?: number } | undefined)?.statusCode;
+  const errorText = code === 429 ? "That's a lot of messages. Try again in a few minutes, or message us on WhatsApp."
+    : code && code >= 400 && code < 500 ? "Something went wrong — try Clear chat or WhatsApp us."
+    : "The assistant is offline right now — message us on WhatsApp";
 
   return (
     <div
@@ -86,10 +101,10 @@ export function ChatWidget({ open, onClose }: { open: boolean; onClose: () => vo
             </ul>
           </div>
         )}
-        <ChatMessages messages={messages} busy={status === "submitted"} />
+        <ChatMessages messages={messages} busy={status === "submitted"} onLead={onLead} />
         {error && (
           <div role="alert" className="mt-3 rounded-xl border border-line bg-white/[0.04] p-3 text-sm">
-            <p>{limited ? "That's a lot of messages. Try again in a few minutes, or message us on WhatsApp." : "The assistant is offline right now — message us on WhatsApp"}</p>
+            <p>{errorText}</p>
             <a href={waLink()} target="_blank" rel="noopener noreferrer" className="mt-2 inline-block rounded-full bg-[#25d366] px-3 py-1.5 font-semibold text-black focus-visible:outline-2 focus-visible:outline-cyan">Message us on WhatsApp</a>
           </div>
         )}

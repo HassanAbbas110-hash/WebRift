@@ -1,14 +1,18 @@
 import { z } from "zod";
 import { phoneSchema } from "@/lib/validation";
 import { createLead } from "@/lib/db";
+import { MAX_LINE_CHARS, MAX_MESSAGES } from "@/lib/chat";
 
 const Body = z.object({
-  source: z.enum(["health-check", "quote"]),
+  source: z.enum(["health-check", "quote", "chat"]),
   name: z.string().trim().min(1).max(80),
   phone: phoneSchema,
   shop: z.string().trim().max(80).optional(),
   area: z.string().trim().max(80).optional(),
   summary: z.string().trim().max(1000).optional(),
+  intent: z.number().int().min(1).max(5).optional(),
+  // Chat transcript as the visitor's browser sends it (shown as unverified in /admin).
+  transcript: z.array(z.object({ role: z.enum(["user", "assistant"]), text: z.string().max(MAX_LINE_CHARS) })).max(MAX_MESSAGES).optional(),
   consent: z.literal(true),
 });
 

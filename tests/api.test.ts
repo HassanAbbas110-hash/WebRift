@@ -90,4 +90,19 @@ describe("POST /api/leads", () => {
     expect(lc()[0]).toMatchObject({ source: "health-check", consent: true });
     expect(lc()[0].summary).toContain("Durban");
   });
+  const chat = { source: "chat", name: "Sam", phone: "060 000 0000", shop: "Cloud 9", summary: "Wants Vape Pro", intent: 5, transcript: [{ role: "user", text: "hi" }, { role: "assistant", text: "hello" }], consent: true };
+  it("saves a consented chat lead with its transcript", async () => {
+    expect((await postLead(req(chat))).status).toBe(200);
+    expect(lc()[0]).toEqual({ source: "chat", name: "Sam", phone: "060 000 0000", shop: "Cloud 9", summary: "Wants Vape Pro", intent: 5, transcript: chat.transcript, consent: true });
+  });
+  it("400s a chat lead without consent or with an oversized transcript", async () => {
+    for (const body of [
+      { ...chat, consent: false }, { ...chat, consent: undefined },
+      { ...chat, transcript: Array.from({ length: 41 }, () => ({ role: "user", text: "x" })) },
+      { ...chat, transcript: [{ role: "user", text: "x".repeat(2001) }] },
+      { ...chat, transcript: [{ role: "system", text: "x" }] },
+      { ...chat, intent: 6 },
+    ]) expect((await postLead(req(body))).status).toBe(400);
+    expect(db.createLead).not.toHaveBeenCalled();
+  });
 });

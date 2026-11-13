@@ -70,7 +70,7 @@ async function Leads() {
             {l.summary}
             {l.source === "chat" && l.transcript != null && (
               <details className="mt-1 text-muted">
-                <summary className="cursor-pointer">Transcript</summary>
+                <summary className="cursor-pointer">Transcript as sent by the visitor&apos;s browser (unverified)</summary>
                 <pre className="mt-1 whitespace-pre-wrap text-xs">{typeof l.transcript === "string" ? l.transcript : JSON.stringify(l.transcript, null, 2)}</pre>
               </details>
             )}
