@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { computeQuote, formatZAR, quoteWhatsAppText } from "@/lib/quote";
+import { computeQuote, formatZAR, paymentLine, quoteWhatsAppText } from "@/lib/quote";
 
 const q = (i: Partial<Parameters<typeof computeQuote>[0]>, floors = {}) =>
   computeQuote({ productIds: [], extraIds: [], payment: "standard", ...i }, floors);
@@ -7,13 +7,22 @@ const q = (i: Partial<Parameters<typeof computeQuote>[0]>, floors = {}) =>
 describe("computeQuote", () => {
   it("vape-pro standard", () => {
     const t = q({ packId: "vape-pro" });
-    expect(t).toMatchObject({ setup: 7000, monthly: 650, year1: 14800, prepayTotal: 13500, deposit: 3500, saveVsMarket: 40850 });
+    expect(t).toMatchObject({ setup: 7000, monthly: 650, year1: 14800, prepayTotal: 13500, deposit: 3500, saveVsMarket: 40850, effectiveYear1: 14800, dueNow: 4150 });
+  });
+  it("vape-pro prepay: year 1 is the prepaid total and savings follow it", () => {
+    const t = q({ packId: "vape-pro", payment: "prepay" });
+    expect(t).toMatchObject({ year1: 14800, effectiveYear1: 13500, saveVsMarket: 42150, dueNow: 10000 });
+    expect(paymentLine(t)).toBe("Year 1 with prepay: R13,500 (setup + 10 months, 2 months free)");
+    const s = quoteWhatsAppText("WR-2026-0142", t, "u");
+    expect(s).toContain("Year 1 (prepaid): R13,500");
+    expect(s).not.toContain("R14,800");
   });
   it("vape-complete instalments", () => {
     const t = q({ packId: "vape-complete", payment: "instalments" });
     expect(t.year1).toBe(20000);
     expect(t.instalment).toBe(3667);
     expect(t.deposit).toBe(3667);
+    expect(t.dueNow).toBe(4417);
   });
   it("discount clamped to floor", () => {
     const t = q({ packId: "vape-starter", setupDiscount: 1000 }, { "vape-starter": 3500 });

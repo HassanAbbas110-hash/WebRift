@@ -2,7 +2,7 @@
 
 import { animate, useReducedMotion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
-import { formatZAR, type QuoteTotals } from "@/lib/quote";
+import { formatZAR, paymentLine, year1Label, type QuoteTotals } from "@/lib/quote";
 
 /** Counts from the last shown value to the new one; jumps straight there under reduced motion. */
 function Num({ value }: { value: number }) {
@@ -22,13 +22,6 @@ function Num({ value }: { value: number }) {
   return <span ref={ref} className="tabular-nums">{formatZAR(value)}</span>;
 }
 
-export const paymentLine = (t: QuoteTotals) =>
-  t.payment === "instalments" ? `3 instalments of ${formatZAR(t.instalment ?? 0)}`
-  : t.payment === "prepay" ? `Prepay 12 months: ${formatZAR(t.prepayTotal)} (2 months free)`
-  : `50% deposit to start: ${formatZAR(t.deposit)}`;
-
-export const lineLabel = (l: QuoteTotals["lines"][number]) => (l.kind === "discount" ? "Negotiated price" : l.label);
-
 type Props = { totals: QuoteTotals; saving: boolean; canSave: boolean };
 
 export function QuoteSummary({ totals: t, saving, canSave }: Props) {
@@ -44,7 +37,7 @@ export function QuoteSummary({ totals: t, saving, canSave }: Props) {
         <ul className="space-y-2 text-sm">
           {priced.map((l, i) => (
             <li key={`${l.kind}-${l.id ?? i}`} className="flex justify-between gap-3">
-              <span className={l.kind === "discount" ? "text-cyan" : "text-text"}>{lineLabel(l)}</span>
+              <span className={l.kind === "discount" ? "text-cyan" : "text-text"}>{l.label}</span>
               <span className="shrink-0 text-right text-muted tabular-nums">
                 {formatZAR(l.setup)}{l.monthly ? ` + ${formatZAR(l.monthly)}/mo` : ""}
               </span>
@@ -63,7 +56,7 @@ export function QuoteSummary({ totals: t, saving, canSave }: Props) {
 
   const totals = (
     <dl className="grid grid-cols-3 gap-2 text-center">
-      {([["Once-off", t.setup], ["Monthly", t.monthly], ["Year 1", t.year1]] as const).map(([k, v]) => (
+      {([["Once-off", t.setup], ["Monthly", t.monthly], [year1Label(t), t.effectiveYear1]] as const).map(([k, v]) => (
         <div key={k} className="rounded-xl bg-white/5 px-2 py-2.5">
           <dt className="text-[11px] tracking-wide text-muted uppercase">{k}</dt>
           <dd className="font-display mt-0.5 text-base font-semibold sm:text-lg"><Num value={v} /></dd>
@@ -75,6 +68,7 @@ export function QuoteSummary({ totals: t, saving, canSave }: Props) {
   const extra = priced.length > 0 && (
     <div className="space-y-1 text-sm">
       <p className="text-text">{paymentLine(t)}</p>
+      <p className="text-text">Due to start: <Num value={t.dueNow} /></p>
       {t.saveVsMarket > 0 && <p className="text-cyan">Save <Num value={t.saveVsMarket} /> vs typical market prices in year 1</p>}
       <p className="text-xs text-muted">Estimate only. ZAR, excluding VAT.</p>
     </div>
@@ -92,7 +86,7 @@ export function QuoteSummary({ totals: t, saving, canSave }: Props) {
   return (
     <>
       <p aria-live="polite" className="sr-only">
-        {priced.length ? `Once-off ${formatZAR(t.setup)}, monthly ${formatZAR(t.monthly)}, year 1 ${formatZAR(t.year1)}.` : ""}
+        {priced.length ? `Once-off ${formatZAR(t.setup)}, monthly ${formatZAR(t.monthly)}, ${year1Label(t).toLowerCase()} ${formatZAR(t.effectiveYear1)}.` : ""}
       </p>
 
       {/* Desktop: sticky side panel */}

@@ -22,8 +22,13 @@ export type QuoteTotals = {
   lines: QuoteLine[];
   setup: number;
   monthly: number;
+  /** setup + 12 × monthly, whatever the payment choice. */
   year1: number;
   prepayTotal: number;
+  /** What year 1 actually costs with the chosen payment: prepayTotal when prepaying, else year1. */
+  effectiveYear1: number;
+  /** Due to start: deposit/first instalment + first month; prepay pays 50% of setup + the 10 months up front. */
+  dueNow: number;
   instalment: number | null;
   deposit: number;
   marketY1: number;
@@ -78,14 +83,18 @@ export function computeQuote(input: QuoteInput, floors: Partial<Record<Pack["id"
   const year1 = setup + 12 * monthly;
   const payment: Payment = input.payment === "instalments" && !pack ? "standard" : input.payment;
   const instalment = payment === "instalments" ? Math.ceil(setup / 3) : null;
+  const prepayTotal = setup + 10 * monthly;
+  const effectiveYear1 = payment === "prepay" ? prepayTotal : year1;
+  const deposit = instalment ?? Math.round(setup * 0.5);
 
   return {
     lines, setup, monthly, year1,
-    prepayTotal: setup + 10 * monthly,
+    prepayTotal, effectiveYear1,
+    dueNow: deposit + (payment === "prepay" ? 10 : 1) * monthly,
     instalment,
-    deposit: instalment ?? Math.round(setup * 0.5),
+    deposit,
     marketY1,
-    saveVsMarket: Math.max(0, marketY1 - year1),
+    saveVsMarket: Math.max(0, marketY1 - effectiveYear1),
     bonuses: pack?.bonuses ?? [],
     payment,
     discountApplied,
@@ -98,6 +107,13 @@ export function formatZAR(n: number): string {
   return `${n < 0 ? "-" : ""}R${s}`;
 }
 
+export const year1Label = (t: QuoteTotals) => (t.payment === "prepay" ? "Year 1 (prepaid)" : "Year 1");
+
+export const paymentLine = (t: QuoteTotals) =>
+  t.payment === "instalments" ? `3 instalments of ${formatZAR(t.instalment ?? 0)}`
+  : t.payment === "prepay" ? `Year 1 with prepay: ${formatZAR(t.prepayTotal)} (setup + 10 months, 2 months free)`
+  : `50% deposit to start: ${formatZAR(t.deposit)}`;
+
 export function quoteWhatsAppText(id: string, t: QuoteTotals, url: string): string {
   const out = [`WebRift quote ${id}`];
   for (const l of t.lines) {
@@ -105,12 +121,8 @@ export function quoteWhatsAppText(id: string, t: QuoteTotals, url: string): stri
     const parts = [l.setup && `${formatZAR(l.setup)} once-off`, l.monthly && `${formatZAR(l.monthly)}/mo`].filter(Boolean);
     out.push(`• ${l.label}: ${parts.join(" + ") || formatZAR(0)}`);
   }
-  out.push(`Once-off: ${formatZAR(t.setup)}`, `Monthly: ${formatZAR(t.monthly)}`, `Year 1: ${formatZAR(t.year1)}`);
-  out.push(
-    t.payment === "instalments" ? `Payment: 3 instalments of ${formatZAR(t.instalment ?? 0)}`
-    : t.payment === "prepay" ? `Payment: prepay 12 months, ${formatZAR(t.prepayTotal)} (2 months free)`
-    : `Payment: 50% deposit (${formatZAR(t.deposit)}) to start`,
-  );
+  out.push(`Once-off: ${formatZAR(t.setup)}`, `Monthly: ${formatZAR(t.monthly)}`, `${year1Label(t)}: ${formatZAR(t.effectiveYear1)}`);
+  out.push(`Payment: ${paymentLine(t)}`, `Due to start: ${formatZAR(t.dueNow)}`);
   out.push("Estimate only, excl. VAT. Prices may change.", url);
   return out.join("\n");
 }
