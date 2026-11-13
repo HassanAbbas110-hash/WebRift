@@ -1,7 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const db = vi.hoisted(() => ({
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- typed args for mock.calls
   createQuote: vi.fn(async (..._a: unknown[]) => ({ id: "WR-2026-0001", validUntil: "2026-11-26" })),
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- typed args for mock.calls
   createLead: vi.fn(async (..._a: unknown[]) => ({ id: "lead-1" })),
   getFloors: vi.fn(async () => ({ "vape-starter": 3500 }) as Record<string, number>),
 }));

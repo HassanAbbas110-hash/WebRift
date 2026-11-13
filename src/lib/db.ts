@@ -121,6 +121,7 @@ export async function getFloors(): Promise<Floors> {
 
 export async function clearFloor(packId: Pack["id"]): Promise<void> {
   const db = sql();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- omit key from rest
   if (!db) { const { [packId]: _, ...rest } = await getOverrides(); mem.settings.set("floors", rest); return; }
   await db`update settings set value = value - ${packId}::text where key = 'floors'`;
 }
