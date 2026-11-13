@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en-ZA" className={`${inter.variable} ${spaceGrotesk.variable} h-full antialiased`}>
+    <html data-motion="lite" lang="en-ZA" className={`${inter.variable} ${spaceGrotesk.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col font-sans">
         {/* Nav reads the pathname, which is unknown at build time on dynamic routes like /q/[id]. */}
         <Suspense fallback={<header className="glass sticky top-0 z-50 h-16 border-b border-line" />}>

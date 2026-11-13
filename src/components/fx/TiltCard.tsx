@@ -1,12 +1,15 @@
 "use client";
 
-import { useRef } from "react";
+import { useMotionMode } from "./motion-store";
+import { useEffect, useRef } from "react";
 
 /** Tilts toward a mouse pointer with a glow that follows it. Touch and reduced motion get a still card. */
 export function TiltCard({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  const { mode } = useMotionMode();
   const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => { if (mode === "lite" && ref.current) ref.current.style.transform = ""; }, [mode]);
   const move = (e: React.PointerEvent) => {
-    if (e.pointerType !== "mouse" || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (e.pointerType !== "mouse" || mode === "lite") return;
     const el = ref.current!;
     const b = el.getBoundingClientRect();
     const x = (e.clientX - b.left) / b.width, y = (e.clientY - b.top) / b.height;

@@ -1,9 +1,12 @@
 "use client";
 
+import { useMotionMode } from "./motion-store";
 import { LazyMotion, MotionConfig, domAnimation, m } from "motion/react";
 
 /** Fade-and-rise once on scroll into view. Reduced motion keeps only the fade. data-reveal un-hides it when JS is off (globals.css). */
 export function Reveal({ children, delay = 0, className }: { children: React.ReactNode; delay?: number; className?: string }) {
+  const { mode } = useMotionMode();
+  if (mode === "lite") return <div className={className}>{children}</div>;
   return (
     <LazyMotion features={domAnimation}>
       <MotionConfig reducedMotion="user">
