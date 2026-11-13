@@ -185,7 +185,7 @@ export const products: Product[] = [
   },
   {
     id: "review-manager", num: 15, name: "Google Review Manager", category: "retention",
-    summary: "We ask happy customers for a Google review (QR or WhatsApp link) and use AI to draft and post polite replies to every review, good or bad.",
+    summary: "We invite customers to leave honest Google reviews (QR or WhatsApp link) and use AI to draft and post polite replies to every review, good or bad.",
     why: "More reviews and fast replies push the shop higher on Google Maps and show new customers the owner cares. A bad review answered well often wins the customer back.",
     includes: ["Review request link and QR", "AI-drafted replies", "Owner approval option", "Alert on bad reviews", "Monthly review summary"],
     setup: 1150, monthly: 260,
@@ -205,12 +205,12 @@ export const products: Product[] = [
   },
   {
     id: "health-check", num: 17, name: "Business Health Check", category: "reports",
-    summary: "A one-off review of the shop against 5 nearby competitors: Google rating and review count, photos, reply rate, website, socials and, where public, price position. The shop gets a score out of 10, a side-by-side comparison and a short action plan.",
+    summary: "An extensive, multi-page business review against 5 nearby competitors. Detailed findings cover Google visibility, reviews, website enquiry journeys, social presence and public pricing where available, with evidence, recommendations and a prioritised action roadmap.",
     why: "Owners rarely see how they stack up. The report shows exactly where they win, where they lose customers and what to fix first, so spending goes where it matters.",
-    includes: ["Score out of 10", "5-competitor comparison", "Google profile and review audit", "Website and social review", "Action plan in priority order"],
+    includes: ["Extensive multi-page report", "Detailed 5-competitor analysis", "Google, website and social findings with evidence", "Prioritised recommendations and implementation roadmap", "Written explanation of scores and opportunities"],
     setup: 2000, monthly: 0,
     market: { low: 1500, avg: 2500, high: 3500 },
-    note: "Agency SEO audits cost R10,000-R31,000 (ProCompare) but cover a different, technical scope. This is a local-shop snapshot. Free bonus in the top packs.",
+    note: "Agency SEO audits cost R10,000-R31,000 (ProCompare) but cover a different, technical scope. This is a detailed local-business review, not a technical SEO audit. The free one-page check is a separate introductory overview. Included at no extra charge in the packs that list this bonus.",
     vapeFit: "High", adoption: 70, rating: 9,
   },
   {
@@ -322,6 +322,7 @@ export const cities: string[] = [
 ];
 
 export const faq: { q: string; a: string }[] = [
+  { q: "What is the difference between the free and paid Health Check?", a: "The free check is a short, one-page overview with a high-level competitor comparison and three priorities. The R2,000 Business Health Check is an extensive multi-page report with detailed competitor findings, evidence, website and enquiry-journey analysis, and a prioritised implementation roadmap. Packs that include the full report state it as a bonus." },
   { q: "How much does a website cost in South Africa?",
     a: "WebRift packs start at R2,200 setup and go up to R11,000, with a monthly plan of R250 to R800 that covers hosting, support and free edits. For comparison, a typical agency charges R30,000 to R85,000 setup plus R2,000 to R2,700 a month, and a freelancer R6,000 to R25,000 plus R500 a month and up. Prices exclude VAT." },
   { q: "How long does it take to build a website?",
