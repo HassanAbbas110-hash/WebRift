@@ -1,6 +1,7 @@
 "use client";
 
-import { animate, useReducedMotion } from "motion/react";
+import { useMotionMode } from "@/components/fx/motion-store";
+import { animate } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { formatZAR, paymentLine, year1Label, type QuoteTotals } from "@/lib/quote";
 
@@ -8,7 +9,8 @@ import { formatZAR, paymentLine, year1Label, type QuoteTotals } from "@/lib/quot
 function Num({ value }: { value: number }) {
   const ref = useRef<HTMLSpanElement>(null);
   const shown = useRef(value);
-  const reduce = useReducedMotion();
+  const { mode } = useMotionMode();
+  const reduce = mode === "lite";
   useEffect(() => {
     const el = ref.current;
     if (!el) return;

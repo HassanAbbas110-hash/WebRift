@@ -143,3 +143,31 @@ body {
   opacity: 0.18;
   pointer-events: none;
 }
+
+/* The scene is a normal project grid until its scroll animation has loaded. */
+.collision-stage { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 1rem; }
+.collision-centre { display: none; }
+[data-enhanced="true"] .collision-stage { display: block; position: relative; height: min(44svh,400px); }
+[data-enhanced="true"] .collision-card { position: absolute; left: 50%; top: 50%; width: clamp(155px,29vw,350px); will-change: transform; }
+[data-enhanced="true"] .collision-centre { display: grid; place-items: center; position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); z-index: 8; }
+html[data-motion="full"] .project-hover { transition: transform 500ms cubic-bezier(.22,1,.36,1), box-shadow 500ms; }
+html[data-motion="full"] .project-hover:hover { transform: translateY(-7px) rotate(-.5deg); box-shadow: 0 25px 65px -25px rgb(34 211 238 / .2); }
+html[data-motion="full"] .hero-aurora { animation: aurora-drift 16s ease-in-out infinite alternate; }
+@keyframes aurora-drift { from { transform: translate3d(-3%,0,0) scale(.95); } to { transform: translate3d(5%,4%,0) scale(1.05); } }
+/* Full and Lite share content and navigation. Lite removes visual work, not features. */
+html[data-motion="lite"] *, html[data-motion="lite"] *::before, html[data-motion="lite"] *::after { animation: none !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+html[data-motion="lite"] [data-reveal] { opacity: 1 !important; transform: none !important; }
+html[data-motion="lite"] .timeline-line { transform: none !important; }
+html[data-motion="lite"] .glass { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgb(7 11 26 / .98); }
+html[data-motion="lite"] .project-hover img { transform: none !important; }
+.image-viewer { width: min(1100px,95vw); max-height: 92svh; margin: auto; padding: 0; border: 1px solid var(--line); border-radius: 1.4rem; background: var(--bg); color: var(--text); }
+.image-viewer::backdrop { background: rgb(0 0 0 / .88); backdrop-filter: blur(8px); }
+.image-viewer[open] { animation: viewer-enter .25s ease-out; }
+@keyframes viewer-enter { from { opacity: 0; transform: translateY(16px) scale(.97); } }
+
+[data-enhanced="true"] { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+html[data-motion="lite"] .image-viewer::backdrop { backdrop-filter: none; }
+html[data-motion="lite"] .hero-aurora { filter: none; opacity: .08; }
+
+html[data-motion="lite"] .collision-card > div { display: none; }
+html[data-motion="lite"] .collision-card figcaption { padding: 1rem; flex-wrap: wrap; font-size: .75rem; }

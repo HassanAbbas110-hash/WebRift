@@ -1,5 +1,6 @@
 "use client";
 
+import { useMotionMode } from "./motion-store";
 import { useEffect, useRef } from "react";
 
 const MESSY = [
@@ -22,9 +23,11 @@ const ORDER: [string, string][] = [
  * The server HTML (and reduced motion) shows both sides statically; GSAP only adds the pinned scrub.
  */
 export default function ScrollStory() {
+  const { mode } = useMotionMode();
   const root = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (mode === "lite") return;
     let revert = () => {};
     let cancelled = false;
     (async () => {
@@ -53,7 +56,7 @@ export default function ScrollStory() {
       revert = () => mm.revert();
     })();
     return () => { cancelled = true; revert(); };
-  }, []);
+  }, [mode]);
 
   return (
     <div ref={root} className="mt-14 grid items-center gap-6 md:motion-safe:min-h-[calc(100svh-8rem)] md:grid-cols-[1fr_auto_1fr]">

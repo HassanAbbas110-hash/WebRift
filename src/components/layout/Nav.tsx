@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { MotionControls } from "@/components/fx/MotionControls";
 import { Logo } from "@/components/brand/Logo";
 import { NAV_LINKS } from "@/lib/site";
 
@@ -26,13 +27,13 @@ export function Nav() {
           <Logo />
         </Link>
 
-        <ul className="hidden items-center gap-1 md:flex">
+        <ul className="hidden items-center gap-0 lg:flex">
           {NAV_LINKS.map((l) => (
             <li key={l.href}>
               <Link
                 href={l.href}
                 aria-current={isActive(l.href) ? "page" : undefined}
-                className="group relative rounded-full px-3.5 py-2 text-sm text-muted transition-colors hover:text-text aria-[current=page]:text-text"
+                className="group relative rounded-full px-2.5 py-2 text-sm text-muted transition-colors hover:text-text aria-[current=page]:text-text"
               >
                 {l.label}
                 <span className="bg-grad absolute inset-x-3.5 -bottom-px h-px scale-x-0 transition-transform group-hover:scale-x-100 group-aria-[current=page]:scale-x-100" />
@@ -42,6 +43,7 @@ export function Nav() {
         </ul>
 
         <div className="flex items-center gap-2">
+          <MotionControls />
           <Link
             href="/quote"
             className="bg-grad hidden rounded-full px-5 py-2 text-sm font-semibold text-white shadow-[0_0_24px_-4px_rgba(59,130,246,0.7)] transition hover:brightness-110 sm:inline-block"
@@ -50,7 +52,7 @@ export function Nav() {
           </Link>
           <button
             type="button"
-            className="grid size-10 place-items-center rounded-full border border-line text-text md:hidden"
+            className="grid size-10 place-items-center rounded-full border border-line text-text lg:hidden"
             aria-expanded={open}
             aria-controls="mobile-menu"
             aria-label={open ? "Close menu" : "Open menu"}
@@ -64,7 +66,7 @@ export function Nav() {
       </nav>
 
       {open && (
-        <div id="mobile-menu" className="border-t border-line bg-bg/95 px-4 pb-5 md:hidden">
+        <div id="mobile-menu" className="border-t border-line bg-bg/95 px-4 pb-5 lg:hidden">
           <ul className="flex flex-col py-2">
             {NAV_LINKS.map((l) => (
               <li key={l.href}>

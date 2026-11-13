@@ -1,13 +1,15 @@
 "use client";
 
+import { useMotionMode } from "./motion-store";
 import { useEffect, useRef } from "react";
 
 /** Counts up from 0 when first scrolled into view. Server HTML and reduced motion show the final value. */
 export function Counter({ value, duration = 1200 }: { value: number; duration?: number }) {
+  const { mode } = useMotionMode();
   const ref = useRef<HTMLSpanElement>(null);
   useEffect(() => {
     const el = ref.current!;
-    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (mode === "lite") return;
     let raf = 0;
     const io = new IntersectionObserver(([e]) => {
       if (!e.isIntersecting) return;
@@ -22,6 +24,6 @@ export function Counter({ value, duration = 1200 }: { value: number; duration?: 
     });
     io.observe(el);
     return () => { io.disconnect(); cancelAnimationFrame(raf); el.textContent = String(value); };
-  }, [value, duration]);
+  }, [value, duration, mode]);
   return <span ref={ref} className="tabular-nums">{value}</span>;
 }
