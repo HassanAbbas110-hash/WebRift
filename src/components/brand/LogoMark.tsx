@@ -36,17 +36,17 @@ export function LogoMark({ size = 40, mono = false, className }: Props) {
         </defs>
       )}
 
-      {/* corner brackets */}
+      {/* corner brackets (pathLength lets .logo-draw animate every stroke the same way) */}
       <g stroke={frame} strokeWidth="5" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M6 30V18Q6 8 16 8H30" />
-        <path d="M90 8H104Q114 8 114 18V30" />
-        <path d="M6 70V82Q6 92 16 92H30" />
-        <path d="M90 92H104Q114 92 114 82V70" />
+        <path pathLength={1} d="M6 30V18Q6 8 16 8H30" />
+        <path pathLength={1} d="M90 8H104Q114 8 114 18V30" />
+        <path pathLength={1} d="M6 70V82Q6 92 16 92H30" />
+        <path pathLength={1} d="M90 92H104Q114 92 114 82V70" />
       </g>
 
       {/* node pins, evenly spaced on the top and bottom edges */}
       <g fill={frame} stroke={frame} strokeWidth="2" strokeLinecap="round">
-        <path d="M40 5V15M80 5V15M40 85V95M80 85V95" />
+        <path pathLength={1} d="M40 5V15M80 5V15M40 85V95M80 85V95" />
         <circle cx="40" cy="4" r="3" />
         <circle cx="80" cy="4" r="3" />
         <circle cx="40" cy="96" r="3" />
@@ -55,8 +55,8 @@ export function LogoMark({ size = 40, mono = false, className }: Props) {
 
       {/* W: two rounded ribbons that cross in the middle */}
       <g strokeWidth="13" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M27 30L45 70L62 44" stroke={left} opacity={mono ? 0.55 : 0.92} />
-        <path d="M58 44L75 70L93 30" stroke={right} opacity={mono ? 1 : 0.85} />
+        <path pathLength={1} d="M27 30L45 70L62 44" stroke={left} opacity={mono ? 0.55 : 0.92} />
+        <path pathLength={1} d="M58 44L75 70L93 30" stroke={right} opacity={mono ? 1 : 0.85} />
       </g>
     </svg>
   );

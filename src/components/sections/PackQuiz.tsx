@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { budgetOptions, quizResult, packFigures, type QuizAnswers } from "@/lib/content";
 import { formatZAR } from "@/lib/quote";
 import { SectionHeading, section } from "./SectionHeading";
@@ -19,6 +19,14 @@ export function PackQuiz() {
   const step = QUESTIONS.findIndex((q) => !answers[q.key]);
   const done = step === -1;
   const f = done ? packFigures(quizResult(answers as QuizAnswers)) : null;
+  const focusTarget = useRef<HTMLLegendElement & HTMLDivElement>(null);
+  const moved = useRef(false);
+
+  // After each answer (or Back / Start again) move focus to the new question, or to the result. Skip the first render.
+  useEffect(() => {
+    if (moved.current) focusTarget.current?.focus();
+    moved.current = true;
+  }, [step]);
 
   return (
     <section className={section}>
@@ -26,7 +34,7 @@ export function PackQuiz() {
         <div aria-hidden="true" className="absolute -bottom-32 -left-20 size-80 rounded-full bg-violet/25 blur-[100px]" />
         <div className="relative grid gap-10 lg:grid-cols-[1fr_1.2fr]">
           <SectionHeading eyebrow="30-second quiz" title={<>Which pack <span className="text-grad">fits me?</span></>} sub="Four quick taps and we'll point you to a starting pack. You can change anything in the quote." />
-          <div aria-live="polite">
+          <div>
             <ol className="mb-6 flex gap-2" aria-label="Progress">
               {QUESTIONS.map((q, i) => (
                 <li key={q.key} className={`h-1 flex-1 rounded-full ${done || i < step ? "bg-grad" : i === step ? "bg-cyan/40" : "bg-white/10"}`} />
@@ -34,7 +42,7 @@ export function PackQuiz() {
             </ol>
             {!done ? (
               <fieldset key={step}>
-                <legend className="font-display text-2xl font-semibold">{QUESTIONS[step].title}</legend>
+                <legend ref={focusTarget} tabIndex={-1} className="font-display text-2xl font-semibold outline-none">{QUESTIONS[step].title}</legend>
                 <div className="mt-5 grid gap-3 sm:grid-cols-2">
                   {QUESTIONS[step].options.map(([value, label]) => (
                     <button
@@ -55,7 +63,7 @@ export function PackQuiz() {
               </fieldset>
             ) : (
               f && (
-                <div>
+                <div ref={focusTarget} tabIndex={-1} aria-live="polite" className="outline-none">
                   <p className="text-sm text-muted">Your best starting point:</p>
                   <p className="font-display mt-1 text-4xl font-bold">{f.pack.name}</p>
                   <p className="mt-2 text-muted">{f.pack.blurb}</p>

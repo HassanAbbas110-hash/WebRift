@@ -15,6 +15,7 @@ export function RatingBars() {
                 <span className={us ? "font-semibold" : "text-muted"}>{c}</span>
                 <span className="h-3 overflow-hidden rounded-full bg-white/[0.06]">
                   <m.span
+                    data-reveal
                     className={`block h-full origin-left rounded-full ${us ? "bg-grad" : "bg-white/25"}`}
                     style={{ width: `${OVERALL[i] * 10}%` }}
                     initial={{ scaleX: 0 }}

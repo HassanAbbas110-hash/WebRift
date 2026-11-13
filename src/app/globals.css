@@ -73,6 +73,58 @@ body {
   }
 }
 
+/* Without JS, Motion's hidden initial state (opacity 0 / scale 0) would never be lifted; with reduced motion, nothing should fade in. */
+@media (scripting: none), (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* Motion layer keyframes, used only behind `motion-safe:` so reduced motion shows the end state. */
+@keyframes fx-fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+}
+@keyframes fx-word {
+  from { opacity: 0; transform: translateY(0.4em); filter: blur(8px); }
+}
+@keyframes fx-draw {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+@keyframes fx-pop {
+  0% { transform: scale(0.4); opacity: 0; }
+  60% { transform: scale(1.15); }
+}
+@keyframes fx-pulse {
+  from { transform: scale(1); opacity: 0.7; }
+  to { transform: scale(3.2); opacity: 0; }
+}
+@keyframes fx-grow {
+  from { transform: scale(var(--grow-x, 1), var(--grow-y, 1)); }
+}
+
+/* Hero logo draws itself in: every path has pathLength="1". */
+@media (prefers-reduced-motion: no-preference) {
+  .logo-draw path {
+    stroke-dasharray: 1;
+    animation: fx-draw 1.4s cubic-bezier(0.65, 0, 0.35, 1) both;
+  }
+  .logo-draw g:last-child path { animation-delay: 0.45s; }
+  .logo-draw circle { animation: fx-pop 0.5s 1s both; transform-box: fill-box; transform-origin: center; }
+}
+
+/* Timeline line draws as it scrolls through the viewport (scroll-driven, off the main thread). Elsewhere it is simply drawn. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .timeline-line {
+      animation: fx-grow linear both;
+      animation-timeline: view();
+      animation-range: entry 20% cover 55%;
+    }
+  }
+}
+
 /* Glass panel with a hairline border and a faint top highlight. */
 @utility card {
   border: 1px solid var(--line);

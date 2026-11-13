@@ -1,3 +1,4 @@
+import { Reveal } from "@/components/fx/Reveal";
 import { COMPARE_COLS, RATINGS, compareRows } from "@/lib/content";
 import { RatingBars } from "./RatingBars";
 import { SectionHeading, section } from "./SectionHeading";
@@ -12,7 +13,8 @@ export function ComparisonSection() {
         title={<>WebRift vs <span className="text-grad">the other options.</span></>}
         sub="Doing it yourself, hiring an agency or a freelancer: here is how it stacks up for a small shop."
       />
-      <div className="card relative mt-14 overflow-x-auto">
+      <Reveal className="mt-14">
+      <div className="card relative overflow-x-auto">
         <table className="w-full min-w-[44rem] text-left text-sm">
           <caption className="sr-only">WebRift compared with DIY, agencies and freelancers</caption>
           <thead>
@@ -35,6 +37,7 @@ export function ComparisonSection() {
           </tbody>
         </table>
       </div>
+      </Reveal>
       <p className="mt-3 text-xs text-muted">
         Entry store, agency, maintenance and Shopify prices: ProCompare, &ldquo;The real cost of an e-commerce website in SA&rdquo;. Other cells are our own view.
       </p>

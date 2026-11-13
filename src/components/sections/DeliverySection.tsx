@@ -1,4 +1,4 @@
-import { Reveal } from "@/components/fx/Reveal";
+import { Timeline } from "@/components/fx/Timeline";
 import { SectionHeading, section } from "./SectionHeading";
 
 // Catalogue p.24.
@@ -36,19 +36,7 @@ export function DeliverySection() {
         title={<>From first message to <span className="text-grad">a live shop.</span></>}
         sub="Clear steps, short timelines and no surprises."
       />
-      {/* Task 8 swaps this for the timeline that draws on scroll. */}
-      <ol className="relative mt-14 grid gap-6 before:absolute before:top-5 before:bottom-5 before:left-5 before:w-px before:bg-[image:var(--grad)] before:opacity-50 md:grid-cols-5 md:gap-4 md:before:right-0 md:before:bottom-auto md:before:left-0 md:before:h-px md:before:w-auto">
-        {STEPS.map((s, i) => (
-          <li key={s.when}>
-            <Reveal delay={i * 0.08} className="relative pl-16 md:pt-16 md:pl-0">
-              <span className="bg-grad absolute top-0 left-0 grid size-10 place-items-center rounded-full font-bold text-white shadow-[0_0_24px_-2px_rgba(59,130,246,0.8)]">{i + 1}</span>
-              <p className="text-xs font-semibold tracking-widest text-cyan uppercase">{s.when}</p>
-              <h3 className="font-display mt-1 text-lg font-semibold">{s.title}</h3>
-              <p className="mt-1 text-sm text-muted">{s.body}</p>
-            </Reveal>
-          </li>
-        ))}
-      </ol>
+      <Timeline steps={STEPS} />
 
       <div className="mt-14 grid gap-5 md:grid-cols-2">
         {([["You provide", PROVIDE], ["You receive", RECEIVE]] as const).map(([title, items]) => (
