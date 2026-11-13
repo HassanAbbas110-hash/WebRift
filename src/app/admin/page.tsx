@@ -8,6 +8,7 @@ import { getFloors, listLeads, listQuotes } from "@/lib/db";
 import { formatZAR } from "@/lib/quote";
 import { waLink } from "@/lib/site";
 import { saveFloors, setStatus } from "./actions";
+import { DeleteButton } from "./DeleteButton";
 
 export const metadata: Metadata = { title: "Admin", robots: { index: false } };
 
@@ -35,10 +36,10 @@ const Wa = ({ phone, text }: { phone: string | null | undefined; text: string })
 async function Quotes() {
   const rows = await listQuotes();
   return (
-    <Table head={["ID", "Date", "Client / shop", "Setup", "Monthly", "Year 1", "Marketer", "Status", ""]}>
+    <Table head={["ID", "Date", "Client / shop", "Setup", "Monthly", "Year 1", "Marketer", "Status", "", ""]}>
       {rows.map((q) => (
         <tr key={q.id} className="border-t border-line align-top">
-          <td className="p-2"><Link href={`/q/${q.id}`} className="text-cyan hover:underline">{q.id}</Link></td>
+          <td className="p-2"><Link href={`/q/${q.id}-${q.token}`} className="text-cyan hover:underline">{q.id}</Link></td>
           <td className="p-2">{date(q.created_at)}</td>
           <td className="p-2">
             {[q.client_name, q.shop_name].filter(Boolean).join(" / ") || "-"}
@@ -46,10 +47,11 @@ async function Quotes() {
           </td>
           <td className="p-2">{formatZAR(q.totals.setup)}</td>
           <td className="p-2">{formatZAR(q.totals.monthly)}</td>
-          <td className="p-2">{formatZAR(q.totals.year1)}</td>
+          <td className="p-2">{formatZAR(q.totals.effectiveYear1)}</td>
           <td className="p-2">{q.marketer ?? "-"}</td>
           <td className="p-2"><StatusForm table="quotes" id={q.id} status={q.status} /></td>
           <td className="p-2"><Wa phone={q.client_phone} text={`Hi ${q.client_name ?? ""}, it's WebRift about your quote ${q.id}.`} /></td>
+          <td className="p-2"><DeleteButton table="quotes" id={q.id} label={`quote ${q.id}`} /></td>
         </tr>
       ))}
     </Table>
@@ -59,7 +61,7 @@ async function Quotes() {
 async function Leads() {
   const rows = await listLeads();
   return (
-    <Table head={["Date", "Source", "Name / shop", "Phone", "Summary", "Status", ""]}>
+    <Table head={["Date", "Source", "Name / shop", "Phone", "Summary", "Status", "", ""]}>
       {rows.map((l) => (
         <tr key={l.id} className="border-t border-line align-top">
           <td className="p-2">{date(l.created_at)}</td>
@@ -77,6 +79,7 @@ async function Leads() {
           </td>
           <td className="p-2"><StatusForm table="leads" id={l.id} status={l.status} /></td>
           <td className="p-2"><Wa phone={l.phone} text={`Hi ${l.name ?? ""}, it's WebRift following up.`} /></td>
+          <td className="p-2"><DeleteButton table="leads" id={l.id} label={`the lead from ${l.name ?? l.source}`} /></td>
         </tr>
       ))}
     </Table>

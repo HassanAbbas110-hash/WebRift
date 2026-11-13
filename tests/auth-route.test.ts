@@ -4,12 +4,12 @@ const role = vi.hoisted(() => ({ value: null as "sales" | "admin" | null }));
 vi.mock("next/headers", () => ({ cookies: async () => ({ get: () => undefined }) }));
 vi.mock("@/lib/auth", async (orig) => ({ ...(await orig<typeof import("@/lib/auth")>()), getRole: async () => role.value }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
-vi.mock("@/lib/db", () => ({ updateStatus: vi.fn(), setFloor: vi.fn(), clearFloor: vi.fn(), getFloors: vi.fn() }));
+vi.mock("@/lib/db", () => ({ updateStatus: vi.fn(), setFloor: vi.fn(), clearFloor: vi.fn(), getFloors: vi.fn(), deleteLead: vi.fn(), deleteQuote: vi.fn() }));
 
 import { GET, POST, DELETE } from "@/app/api/auth/route";
 import { assertAdmin } from "@/lib/admin";
 import * as db from "@/lib/db";
-import { saveFloors, setStatus } from "@/app/admin/actions";
+import { deleteRow, saveFloors, setStatus } from "@/app/admin/actions";
 
 let n = 0;
 const post = (body: unknown, ip = `1.1.1.${++n}`) =>
@@ -78,5 +78,16 @@ describe("admin actions", () => {
     expect(db.updateStatus).not.toHaveBeenCalled();
     expect(db.setFloor).not.toHaveBeenCalled();
     expect(db.clearFloor).not.toHaveBeenCalled();
+    await expect(deleteRow(fd({ table: "quotes", id: "WR-2026-0001" }))).rejects.toThrow();
+    await expect(deleteRow(fd({ table: "leads", id: "x" }))).rejects.toThrow();
+    expect(db.deleteQuote).not.toHaveBeenCalled();
+    expect(db.deleteLead).not.toHaveBeenCalled();
+  });
+  it("admin deletes a quote or a lead", async () => {
+    role.value = "admin";
+    await deleteRow(fd({ table: "quotes", id: "WR-2026-0001" }));
+    await deleteRow(fd({ table: "leads", id: "lead-1" }));
+    expect(db.deleteQuote).toHaveBeenCalledWith("WR-2026-0001");
+    expect(db.deleteLead).toHaveBeenCalledWith("lead-1");
   });
 });

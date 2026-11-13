@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const db = vi.hoisted(() => ({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars -- typed args for mock.calls
-  createQuote: vi.fn(async (..._a: unknown[]) => ({ id: "WR-2026-0001", validUntil: "2026-11-26" })),
+  createQuote: vi.fn(async (..._a: unknown[]) => ({ id: "WR-2026-0001", token: "a1b2c3d4e5", validUntil: "2026-11-26" })),
   // eslint-disable-next-line @typescript-eslint/no-unused-vars -- typed args for mock.calls
   createLead: vi.fn(async (..._a: unknown[]) => ({ id: "lead-1" })),
   getFloors: vi.fn(async () => ({ "vape-starter": 3500 }) as Record<string, number>),
@@ -28,7 +28,9 @@ describe("POST /api/quotes", () => {
   it("ignores client totals and stores server-computed ones", async () => {
     const res = await postQuote(req({ input: { packId: "vape-pro", payment: "standard" }, totals: { setup: 1 } }));
     expect(res.status).toBe(200);
-    expect(await res.json()).toMatchObject({ id: "WR-2026-0001", url: "/q/WR-2026-0001", validUntil: "2026-11-26" });
+    const body = await res.json();
+    expect(body).toMatchObject({ id: "WR-2026-0001", url: "/q/WR-2026-0001-a1b2c3d4e5", validUntil: "2026-11-26" });
+    expect(body.url).toMatch(/^\/q\/WR-\d{4}-\d{4,}-[0-9a-f]{10}$/);
     expect(qc()[1].setup).toBe(7000);
   });
   it("400s on an empty quote", async () => {

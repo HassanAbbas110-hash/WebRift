@@ -4,23 +4,22 @@ import Link from "next/link";
 import { useState, useSyncExternalStore } from "react";
 import { Logo } from "@/components/brand/Logo";
 import { terms } from "@/data/catalogue";
-import { formatZAR, quoteWhatsAppText, type QuoteTotals } from "@/lib/quote";
+import { formatZAR, paymentLine, quoteWhatsAppText, year1Label, type QuoteTotals } from "@/lib/quote";
 import { waLink } from "@/lib/site";
-import { lineLabel, paymentLine } from "./QuoteSummary";
 
 type Props = {
-  id: string; date: string; validUntil: string; shop: string | null;
-  totals: QuoteTotals; expired: boolean;
+  id: string; token: string; date: string; validUntil: string; shop: string | null;
+  totals: QuoteTotals; expired: boolean; negotiated: boolean; marketer: string | null;
 };
 
 const noop = () => () => {};
 const btn = "rounded-full border border-line bg-white/5 px-5 py-2.5 text-sm font-semibold transition hover:border-cyan";
 
-export function PrintQuote({ id, date, validUntil, shop, totals: t, expired }: Props) {
+export function PrintQuote({ id, token, date, validUntil, shop, totals: t, expired, negotiated, marketer }: Props) {
   const origin = useSyncExternalStore(noop, () => location.origin, () => "");
   const [copied, setCopied] = useState(false);
-  const url = `${origin}/q/${id}`;
-  const rows: [string, number][] = [["Once-off setup", t.setup], ["Monthly", t.monthly], ["Year 1 total", t.year1]];
+  const url = `${origin}/q/${id}-${token}`;
+  const rows: [string, number][] = [["Once-off setup", t.setup], ["Monthly", t.monthly], [`${year1Label(t)} total`, t.effectiveYear1]];
 
   return (
     <article className="quote-doc mx-auto max-w-3xl px-4 py-10 sm:px-6">
@@ -36,8 +35,10 @@ export function PrintQuote({ id, date, validUntil, shop, totals: t, expired }: P
           <span className="hidden text-lg print:block"><Logo variant="mono" /></span>
           <dl className="text-right text-sm">
             <dt className="sr-only">Quote</dt><dd className="font-display text-lg font-semibold">{id}</dd>
+            {negotiated && <dd className="my-1"><span className="rounded-full border border-cyan/40 px-2.5 py-0.5 text-xs font-semibold text-cyan">Negotiated price</span></dd>}
             <dt className="inline text-muted">Date: </dt><dd className="inline">{date}</dd><br />
             <dt className="inline text-muted">Valid until: </dt><dd className="inline">{validUntil}</dd>
+            {marketer && <><br /><dt className="inline text-muted">Prepared by </dt><dd className="inline">{marketer}</dd></>}
           </dl>
         </header>
         {shop && <p className="mt-6 text-sm text-muted">Prepared for <span className="font-semibold text-text">{shop}</span></p>}
@@ -49,7 +50,7 @@ export function PrintQuote({ id, date, validUntil, shop, totals: t, expired }: P
           <tbody className="tabular-nums">
             {t.lines.map((l, i) => (
               <tr key={i} className="border-t border-line">
-                <td className={`py-2 ${l.included ? "pl-4 text-muted" : ""}`}>{lineLabel(l)}</td>
+                <td className={`py-2 ${l.included ? "pl-4 text-muted" : ""}`}>{l.label}</td>
                 <td className="py-2 text-right">{l.included ? "Included" : formatZAR(l.setup)}</td>
                 <td className="py-2 text-right">{l.included ? "" : l.monthly ? formatZAR(l.monthly) : "-"}</td>
               </tr>
@@ -69,6 +70,7 @@ export function PrintQuote({ id, date, validUntil, shop, totals: t, expired }: P
         <section className="mt-6 text-sm">
           <h2 className="font-semibold">Payment plan</h2>
           <p className="mt-1">{paymentLine(t)}</p>
+          <p className="mt-1">Due to start: {formatZAR(t.dueNow)}</p>
           {t.saveVsMarket > 0 && <p className="mt-1 text-muted">You save {formatZAR(t.saveVsMarket)} vs typical market prices in year 1.</p>}
         </section>
 
@@ -92,7 +94,7 @@ export function PrintQuote({ id, date, validUntil, shop, totals: t, expired }: P
 
       <div data-no-print className="mt-6 flex flex-wrap gap-3">
         {!expired && (
-          <a href={waLink(`Hi WebRift, I want to go ahead with quote ${id}.`)} target="_blank" rel="noopener noreferrer"
+          <a href={waLink(`Hi WebRift, I want to go ahead with quote ${id}: ${url}`)} target="_blank" rel="noopener noreferrer"
             className="bg-grad rounded-full px-6 py-2.5 text-sm font-semibold text-white shadow-[0_0_30px_-6px_rgba(59,130,246,0.8)]">
             I want to go ahead
           </a>

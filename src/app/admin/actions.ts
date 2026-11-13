@@ -3,7 +3,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { packs } from "@/data/catalogue";
 import { assertAdmin } from "@/lib/admin";
-import { clearFloor, setFloor, updateStatus } from "@/lib/db";
+import { clearFloor, deleteLead, deleteQuote, setFloor, updateStatus } from "@/lib/db";
 
 const Status = z.enum(["new", "contacted", "won", "lost"]);
 
@@ -12,6 +12,13 @@ export async function setStatus(formData: FormData) {
   const table = formData.get("table") === "leads" ? "leads" : "quotes";
   const status = Status.parse(formData.get("status"));
   await updateStatus(table, z.string().min(1).parse(formData.get("id")), status);
+  revalidatePath("/admin");
+}
+
+export async function deleteRow(formData: FormData) {
+  await assertAdmin();
+  const id = z.string().min(1).parse(formData.get("id"));
+  await (formData.get("table") === "leads" ? deleteLead(id) : deleteQuote(id));
   revalidatePath("/admin");
 }
 

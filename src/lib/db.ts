@@ -1,3 +1,4 @@
+import { randomBytes, timingSafeEqual } from "node:crypto";
 import { neon } from "@neondatabase/serverless";
 import type { Pack } from "@/data/catalogue";
 import { DEFAULT_FLOORS } from "@/lib/floors";
@@ -9,7 +10,7 @@ export type QuoteMeta = {
   negotiated?: boolean;
 };
 export type QuoteRow = {
-  id: string; seq: number; created_at: string; valid_until: string;
+  id: string; token: string; seq: number; created_at: string; valid_until: string;
   input: QuoteInput; totals: QuoteTotals;
   client_name: string | null; client_phone: string | null; shop_name: string | null;
   marketer: string | null; negotiated: boolean; status: string;
@@ -27,7 +28,11 @@ type Floors = Partial<Record<Pack["id"], number>>;
 type Mem = { quotes: QuoteRow[]; leads: LeadRow[]; settings: Map<string, unknown>; seq: number };
 const g = globalThis as { __wrMem?: Mem };
 const mem: Mem = (g.__wrMem ??= { quotes: [], leads: [], settings: new Map(), seq: 0 });
-const sql = () => (process.env.DATABASE_URL ? neon(process.env.DATABASE_URL) : null);
+const sql = () => {
+  if (process.env.DATABASE_URL) return neon(process.env.DATABASE_URL);
+  if (process.env.VERCEL_ENV === "production") throw new Error("DATABASE_URL is required in production");
+  return null;
+};
 
 const jhb = (d: Date) => new Intl.DateTimeFormat("en-CA", { timeZone: "Africa/Johannesburg" }).format(d); // YYYY-MM-DD
 export const validUntilFrom = (d = new Date()) => {
@@ -40,13 +45,13 @@ export async function createQuote(input: QuoteInput, totals: QuoteTotals, meta: 
   const c = meta.client;
   const db = sql();
   if (!db) {
-    const seq = ++mem.seq, id = `WR-${year}-${String(seq).padStart(4, "0")}`;
+    const seq = ++mem.seq, id = `WR-${year}-${String(seq).padStart(4, "0")}`, token = randomBytes(5).toString("hex");
     mem.quotes.push({
-      id, seq, created_at: now.toISOString(), valid_until: validUntil, input, totals,
+      id, token, seq, created_at: now.toISOString(), valid_until: validUntil, input, totals,
       client_name: c?.name ?? null, client_phone: c?.phone ?? null, shop_name: c?.shop ?? null,
       marketer: meta.marketer ?? null, negotiated: !!meta.negotiated, status: "new",
     });
-    return { id, validUntil };
+    return { id, token, validUntil };
   }
   // One statement: nextval feeds both seq and id, so it is atomic.
   const rows = await db`
@@ -55,24 +60,41 @@ export async function createQuote(input: QuoteInput, totals: QuoteTotals, meta: 
     select 'WR-' || ${year}::text || '-' || case when n.s < 10000 then lpad(n.s::text, 4, '0') else n.s::text end, n.s, ${validUntil}::date,
       ${JSON.stringify(input)}::jsonb, ${JSON.stringify(totals)}::jsonb,
       ${c?.name ?? null}, ${c?.phone ?? null}, ${c?.shop ?? null}, ${meta.marketer ?? null}, ${!!meta.negotiated}
-    from n returning id`;
-  return { id: rows[0].id as string, validUntil };
+    from n returning id, token`;
+  return { id: rows[0].id as string, token: rows[0].token as string, validUntil };
 }
 
 // neon returns timestamptz as Date; normalise so both paths give an ISO string.
 const iso = (r: QuoteRow): QuoteRow => ({ ...r, created_at: new Date(r.created_at).toISOString() });
 
-export async function getQuote(id: string): Promise<QuoteRow | null> {
+const sameToken = (a: string, b: string) =>
+  a.length === b.length && timingSafeEqual(Buffer.from(a), Buffer.from(b));
+
+/** Null unless the share token matches, so quote numbers alone can't be enumerated. */
+export async function getQuote(id: string, token: string): Promise<QuoteRow | null> {
   const db = sql();
-  if (!db) return mem.quotes.find((q) => q.id === id) ?? null;
-  const rows = (await db`select id, seq, created_at, to_char(valid_until, 'YYYY-MM-DD') as valid_until, input, totals, client_name, client_phone, shop_name, marketer, negotiated, status from quotes where id = ${id}`) as QuoteRow[];
-  return rows[0] ? iso(rows[0]) : null;
+  const row = db
+    ? ((await db`select id, token, seq, created_at, to_char(valid_until, 'YYYY-MM-DD') as valid_until, input, totals, client_name, client_phone, shop_name, marketer, negotiated, status from quotes where id = ${id}`) as QuoteRow[]).map(iso)[0]
+    : mem.quotes.find((q) => q.id === id);
+  return row && sameToken(row.token, token) ? row : null;
+}
+
+export async function deleteQuote(id: string): Promise<void> {
+  const db = sql();
+  if (!db) { mem.quotes = mem.quotes.filter((q) => q.id !== id); return; }
+  await db`delete from quotes where id = ${id}`;
+}
+
+export async function deleteLead(id: string): Promise<void> {
+  const db = sql();
+  if (!db) { mem.leads = mem.leads.filter((l) => l.id !== id); return; }
+  await db`delete from leads where id = ${id}`;
 }
 
 export async function listQuotes(): Promise<QuoteRow[]> {
   const db = sql();
   if (!db) return [...mem.quotes].reverse();
-  return ((await db`select id, seq, created_at, to_char(valid_until, 'YYYY-MM-DD') as valid_until, input, totals, client_name, client_phone, shop_name, marketer, negotiated, status from quotes order by seq desc`) as QuoteRow[]).map(iso);
+  return ((await db`select id, token, seq, created_at, to_char(valid_until, 'YYYY-MM-DD') as valid_until, input, totals, client_name, client_phone, shop_name, marketer, negotiated, status from quotes order by seq desc`) as QuoteRow[]).map(iso);
 }
 
 export async function createLead(l: LeadInput): Promise<{ id: string }> {

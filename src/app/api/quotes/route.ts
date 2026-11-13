@@ -39,10 +39,10 @@ export async function POST(req: Request) {
   const totals = computeQuote(input, await getFloors());
   if (totals.lines.length === 0) return Response.json({ error: "Empty quote" }, { status: 400 });
   const negotiated = !!role && (totals.discountApplied > 0 || !!input.customLines?.length);
-  const { id, validUntil } = await createQuote(input, totals, {
+  const { id, token, validUntil } = await createQuote(input, totals, {
     client: client && { name: client.name, phone: client.phone, shop: client.shop },
     marketer: negotiated ? marketer ?? role! : undefined, // role stands in when no name was typed
     negotiated,
   });
-  return Response.json({ id, url: `/q/${id}`, validUntil });
+  return Response.json({ id, url: `/q/${id}-${token}`, validUntil });
 }
