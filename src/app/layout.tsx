@@ -33,7 +33,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </Suspense>
         <main className="flex-1">{children}</main>
         <Footer />
-        <ChatLauncher />
+        {/* Off until the AI Gateway has a card on file: set NEXT_PUBLIC_CHAT_ENABLED=1 on Vercel and redeploy. */}
+        {process.env.NEXT_PUBLIC_CHAT_ENABLED === "1" && <ChatLauncher />}
         <WhatsAppFab />
       </body>
     </html>

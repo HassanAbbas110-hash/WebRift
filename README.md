@@ -59,3 +59,7 @@ Click **Team** in the footer and enter the `SALES_PIN`. On the quote page a disc
 - Live AI answers have not been tested (no key during development).
 - The Postgres path has not been tested against a real database.
 - Not checked in Safari, Firefox or on a real phone.
+
+## Turning the AI chat on
+
+The chat button is hidden by default. To show it: add a card in Vercel > AI Gateway (set a spend limit too), add the environment variable `NEXT_PUBLIC_CHAT_ENABLED` with value `1` to the Vercel project, and redeploy.
