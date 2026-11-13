@@ -147,7 +147,9 @@ export function QuoteBuilder() {
 
         <fieldset>
           <legend className={legend}>{stepNo(2)}Add products and extras</legend>
-          <div className="space-y-6">
+          <details key={s.pack?.id ?? "custom"} open={!s.pack || s.picked.length > 0 || s.extraIds.length > 0} className="rounded-2xl border border-line p-4">
+            <summary className="cursor-pointer text-sm font-medium text-cyan">Browse all products and extras <span className="font-normal text-muted">— optional with a pack</span></summary>
+            <div className="mt-5 space-y-6">
             {GROUPS.map(([cat, title]) => (
               <div key={cat}>
                 <h3 className="mb-2 text-sm font-semibold tracking-wide text-muted uppercase">{title}</h3>
@@ -185,6 +187,7 @@ export function QuoteBuilder() {
               </ul>
             </div>
           </div>
+          </details>
         </fieldset>
 
         <fieldset>

@@ -5,6 +5,7 @@ export const PHONE_TEL = "+27817179974";
 
 export const NAV_LINKS = [
   { href: "/", label: "Home" },
+  { href: "/work", label: "Our work" },
   { href: "/services", label: "Services" },
   { href: "/packs", label: "Packs" },
   { href: "/quote", label: "Quote" },

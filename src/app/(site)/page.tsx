@@ -1,3 +1,4 @@
+import { PortfolioSection } from "@/components/sections/PortfolioSection";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { CategoriesSection } from "@/components/sections/CategoriesSection";
 import { CitiesSection } from "@/components/sections/CitiesSection";
@@ -18,6 +19,7 @@ export default function Home() {
       <JsonLd data={jsonLd.business()} />
       <JsonLd data={jsonLd.faq()} />
       <Hero />
+      <PortfolioSection />
       <CategoriesSection />
       <FeaturedPacks />
       <PackQuiz />

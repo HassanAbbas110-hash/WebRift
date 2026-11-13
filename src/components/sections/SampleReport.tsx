@@ -13,7 +13,7 @@ const METRICS: { label: string; shop: number; avg: number; max: number; fmt?: (n
 ];
 const YESNO: [string, string, string][] = [["Website that takes orders", "No", "Yes"], ["Opening hours complete", "Partly", "Yes"]];
 const ACTIONS = [
-  ["Get more reviews", "Put a QR stand at the till and message happy customers a review link. Aim for 100 reviews in 6 months."],
+  ["Get more reviews", "Put a QR stand at the till and invite customers to leave honest feedback with a review link. Track genuine responses over time."],
   ["Reply to every review", "AI-drafted replies, posted within a day. Competitors reply to 7 in 10."],
   ["Launch an order page", "A storefront or price-list page with a WhatsApp order button. 4 of 5 competitors already have one."],
 ];
