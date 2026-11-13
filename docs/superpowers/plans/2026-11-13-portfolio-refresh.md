@@ -10,7 +10,7 @@ Approved direction: evolve the current site rather than replace its design. Add 
 - [x] Replace self-scored competitor ratings with a factual comparison and WebRift strengths.
 - [x] Distinguish free one-page health check from the extensive paid R2,000 report across catalogue and page.
 - [x] Make quote extras progressively disclosed; preserve every product, URL state and price calculation.
-- [ ] Add navigation/sitemap entries, run existing tests/lint/types/build, check desktop and narrow layout, publish through GitHub and verify Vercel production.
+- [x] Add navigation/sitemap entries, run existing tests/lint/types/build, verify desktop flows and publish through GitHub/Vercel. Real narrow-device verification remains a separate check.
 
 Review focus: archived projects have no misleading live links; demos never appear as paid clients; missing images remain honest; keyboard and reduced-motion work; quote pricing remains unchanged. No database, auth, payment or client-site edits.
 
@@ -19,3 +19,5 @@ Review focus: archived projects have no misleading live links; demos never appea
 Initial 90 tests, lint, generated Next types, TypeScript and production build pass. Initial preview dpl_7sJo3QdT2jwv53FREuyyuN3zdx79 is READY. Browser verified portfolio filters (six total, three clients, three demos), preserved images, free/paid health-check wording, collapsed pack extras and Retail Starter totals (R5,200 standard, R4,700 prepay). No lead or quote records were submitted.
 
 Repository write access became available after the owner updated GitHub installation 181548175. Existing project previews recovered the two expired-domain client designs; six real screenshots are now preserved. Final checks and Git-backed publishing follow. Production release status is recorded in docs/portfolio-release.md after deployment.
+
+Released via PR #1 as 0c72d169d591eccc09d2adb19459803885d6973e. Vercel dpl_AUUDVQDr5szkBxor5NgADmLvGcVS is READY and assigned to webrift-nine.vercel.app. See docs/portfolio-release.md.
