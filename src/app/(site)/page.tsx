@@ -10,6 +10,7 @@ import { DemosSection } from "@/components/sections/DemosSection";
 import { FaqSection } from "@/components/sections/FaqSection";
 import { FeaturedPacks } from "@/components/sections/FeaturedPacks";
 import { Hero } from "@/components/sections/Hero";
+import { ReviewsSection } from "@/components/sections/ReviewsSection";
 import { PackQuiz } from "@/components/sections/PackQuiz";
 import { ScrollStorySection } from "@/components/sections/ScrollStorySection";
 import { jsonLd } from "@/lib/content";
@@ -22,6 +23,7 @@ export default function Home() {
       <Hero />
       <ProjectCollision />
       <PortfolioSection />
+      <ReviewsSection />
       <CategoriesSection />
       <FeaturedPacks />
       <PackQuiz />
