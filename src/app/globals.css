@@ -55,6 +55,17 @@ body {
   -webkit-backdrop-filter: blur(16px) saturate(160%);
 }
 
+/* Phones: a "Build my quote" bar replaces the round WhatsApp button on site pages, except where the quote sheet is showing. */
+@media (width < 64rem) {
+  body:has([data-site]) [data-mobile-cta] { display: flex; }
+  body:has([data-site]) [data-fab] { display: none; }
+  body:has([data-site]) { padding-bottom: 4.75rem; }
+  /* The quote page has its own bottom sheet with the totals and Save button. */
+  body:has([data-sheet]) [data-mobile-cta] { display: none; }
+  body:has([data-sheet]) [data-fab] { display: grid; }
+  body:has([data-sheet]) { padding-bottom: 0; }
+}
+
 /* Lift the WhatsApp button above the quote bottom sheet on small screens. */
 @media (width < 64rem) {
   body:has([data-sheet]) [data-fab] {

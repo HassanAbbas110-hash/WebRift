@@ -2,7 +2,10 @@ import { HeroMotion } from "@/components/fx/HeroMotion";
 import Image from "next/image";
 import Link from "next/link";
 import { packs, products } from "@/data/catalogue";
+import { formatZAR } from "@/lib/quote";
 import { HeroVisual } from "./HeroVisual";
+
+const entry = packs.reduce((a, b) => (b.setup < a.setup ? b : a));
 
 export function Hero() {
   return <HeroMotion><section className="relative isolate overflow-hidden border-b border-line">
@@ -16,7 +19,7 @@ export function Hero() {
           <Link href="/quote" className="bg-grad rounded-full px-6 py-3.5 text-center font-semibold text-white shadow-[0_0_36px_-8px_rgba(59,130,246,0.7)] transition hover:brightness-110">Build my quote →</Link>
           <Link href="/work" className="rounded-full border border-cyan/30 bg-white/5 px-6 py-3.5 text-center font-semibold transition hover:border-cyan hover:bg-white/10">See our work ↗</Link>
         </div>
-        <p className="mt-5 text-sm text-muted">WhatsApp-first. Clear setup + monthly pricing. <Link href="/health-check" className="text-cyan underline underline-offset-4">Start with a free check.</Link></p>
+        <p className="mt-5 text-sm text-muted">Packs from <strong className="font-semibold text-white">{formatZAR(entry.setup)} setup + {formatZAR(entry.monthly)}/month</strong>. <Link href="/health-check" className="text-cyan underline underline-offset-4">Start with a free check.</Link></p>
         <dl className="mt-9 grid max-w-lg grid-cols-3 gap-4 border-t border-line pt-6">{[[String(products.length), "shop tools"], [String(packs.length), "flexible packs"], ["7–10 days", "target launch*"]].map(([n,l]) => <div key={l}><dt className="text-xs text-muted">{l}</dt><dd className="font-display mt-1 text-xl font-semibold sm:text-2xl">{n}</dd></div>)}</dl>
         <p className="mt-3 text-[11px] text-muted">*After your content is ready; scope and third-party approvals can affect timing.</p>
       </div>

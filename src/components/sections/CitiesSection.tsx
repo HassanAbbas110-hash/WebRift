@@ -12,7 +12,7 @@ export function CitiesSection() {
         sub="We work with shops in these cities, and anywhere else in South Africa over WhatsApp."
       />
       <div className="mt-12 grid items-center gap-10 lg:grid-cols-[1.2fr_1fr]">
-        <div className="card flex justify-center p-4 sm:p-8">
+        <div className="card hidden justify-center p-4 sm:flex sm:p-8">
           <CityMap cities={cities} />
         </div>
         <ul className="grid grid-cols-2 gap-3">

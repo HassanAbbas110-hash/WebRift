@@ -55,6 +55,7 @@ export default function ContactPage() {
           <div className="mt-6 flex flex-col gap-3 sm:flex-row">
             <Link href="/quote" className="bg-grad rounded-full px-6 py-3 text-center font-semibold text-white">Build my quote →</Link>
             <Link href="/health-check" className="rounded-full border border-line px-6 py-3 text-center font-semibold hover:border-cyan/50">Free health check</Link>
+            <a href="/forms/WebRift_Application_Form.pdf" download className="rounded-full border border-line px-6 py-3 text-center font-semibold hover:border-cyan/50">Application form (PDF)</a>
           </div>
         </section>
       </div>

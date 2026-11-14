@@ -1,4 +1,4 @@
-"""Builds docs/forms/WebRift_Application_Form.pdf (fillable). Run: python scripts/make_application_form.py
+"""Builds public/forms/WebRift_Application_Form.pdf (fillable). Run: python scripts/make_application_form.py
 
 Prices are a snapshot of src/data/catalogue.ts (November 2026). Update PACKS/PRODUCTS here when prices change.
 """
@@ -12,7 +12,7 @@ from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.platypus import Paragraph
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-OUT = os.path.join(ROOT, "docs", "forms", "WebRift_Application_Form.pdf")
+OUT = os.path.join(ROOT, "public", "forms", "WebRift_Application_Form.pdf")
 LOGO = os.path.join(ROOT, "docs", "forms", "assets", "logo-mark.png")
 
 W, H = A4

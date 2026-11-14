@@ -53,7 +53,19 @@ export default function ScrollStory() {
           .from(q("[data-line]"), { opacity: 0, x: -16, stagger: 0.12, duration: 0.3 })
           .from(q("[data-stamp]"), { opacity: 0, scale: 1.6, rotate: -12, duration: 0.3 });
       });
-      revert = () => mm.revert();
+      // Sections above load late and add their own pinned scenes, which moves this one. Re-measure when the page height changes,
+      // otherwise the pin starts hundreds of pixels late and the stage scrolls off screen first.
+      let height = document.documentElement.scrollHeight;
+      const ro = new ResizeObserver(() => {
+        const next = document.documentElement.scrollHeight;
+        if (next === height) return;
+        height = next;
+        ScrollTrigger.sort();
+        ScrollTrigger.refresh();
+        height = document.documentElement.scrollHeight;
+      });
+      ro.observe(document.body);
+      revert = () => { ro.disconnect(); mm.revert(); };
     })();
     return () => { cancelled = true; revert(); };
   }, [mode]);
