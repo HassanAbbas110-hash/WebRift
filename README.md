@@ -63,3 +63,14 @@ Click **Team** in the footer and enter the `SALES_PIN`. On the quote page a disc
 ## Turning the AI chat on
 
 The chat button is hidden by default. To show it: add a card in Vercel > AI Gateway (set a spend limit too), add the environment variable `NEXT_PUBLIC_CHAT_ENABLED` with value `1` to the Vercel project, and redeploy.
+
+## Sales deck ("Why you need a website")
+
+The animated deck is at `/pitch` (not in the menu, hidden from Google). The marketer opens it on a phone or tablet and swipes through.
+Facts and client numbers live in `src/data/pitch.ts`; every figure there has a source.
+
+To rebuild the PDF copy after a change, run the site locally (`npm run dev`), then:
+
+```bash
+"/c/Program Files/Google/Chrome/Application/chrome.exe" --headless=new --no-pdf-header-footer --virtual-time-budget=8000 --print-to-pdf="public/forms/WebRift_Why_You_Need_A_Website.pdf" "http://localhost:3000/pitch"
+```
