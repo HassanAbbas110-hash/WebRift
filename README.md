@@ -74,3 +74,12 @@ To rebuild the PDF copy after a change, run the site locally (`npm run dev`), th
 ```bash
 "/c/Program Files/Google/Chrome/Application/chrome.exe" --headless=new --no-pdf-header-footer --virtual-time-budget=8000 --print-to-pdf="public/forms/WebRift_Why_You_Need_A_Website.pdf" "http://localhost:3000/pitch"
 ```
+
+## Partner brochure (PDF)
+
+The 13-page A4 brochure is built from `/brochure` (hidden from Google) using the live catalogue prices, portfolio and client results.
+Miki's number and the site address are constants at the top of `src/app/brochure/page.tsx`. Rebuild the PDF the same way as the sales deck:
+
+```bash
+"/c/Program Files/Google/Chrome/Application/chrome.exe" --headless=new --no-pdf-header-footer --virtual-time-budget=10000 --print-to-pdf="public/forms/WebRift_Partner_Brochure.pdf" "http://localhost:3000/brochure"
+```
